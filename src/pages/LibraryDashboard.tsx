@@ -194,6 +194,29 @@ export default function LibraryDashboard() {
           related_entity_id: applicationId
         });
 
+      // Notify College Office staff when local students are approved
+      if (approved && application?.profiles?.student_type === 'local') {
+        const { data: collegeOfficeStaff } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'college_office');
+
+        if (collegeOfficeStaff && collegeOfficeStaff.length > 0) {
+          const collegeOfficeNotifications = collegeOfficeStaff.map(staff => ({
+            user_id: staff.user_id,
+            title: 'New Application for Office Verification',
+            message: `${application.profiles.name} (${application.profiles.usn}) from ${application.department} - Semester ${application.semester} has been approved by Library and requires College Office verification.`,
+            type: 'info' as const,
+            related_entity_type: 'application',
+            related_entity_id: applicationId
+          }));
+
+          await supabase
+            .from('notifications')
+            .insert(collegeOfficeNotifications);
+        }
+      }
+
       toast({
         title: "Success!",
         description: `Application ${approved ? 'approved' : 'rejected'} successfully`,

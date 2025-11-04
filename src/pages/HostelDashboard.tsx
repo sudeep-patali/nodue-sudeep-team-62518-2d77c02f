@@ -115,6 +115,29 @@ export default function HostelDashboard() {
           related_entity_id: applicationId
         });
 
+      // Notify College Office staff when hostel students are approved
+      if (approved) {
+        const { data: collegeOfficeStaff } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'college_office');
+
+        if (collegeOfficeStaff && collegeOfficeStaff.length > 0) {
+          const collegeOfficeNotifications = collegeOfficeStaff.map(staff => ({
+            user_id: staff.user_id,
+            title: 'New Application for Office Verification',
+            message: `${selectedApp.profiles.name} (${selectedApp.profiles.usn}) from ${selectedApp.department} - Semester ${selectedApp.semester} has been approved by Hostel and requires College Office verification.`,
+            type: 'info' as const,
+            related_entity_type: 'application',
+            related_entity_id: applicationId
+          }));
+
+          await supabase
+            .from('notifications')
+            .insert(collegeOfficeNotifications);
+        }
+      }
+
       toast({
         title: "Success!",
         description: `Application ${approved ? 'approved' : 'rejected'} successfully`,

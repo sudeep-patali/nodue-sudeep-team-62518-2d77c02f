@@ -36,6 +36,29 @@ export default function CollegeOfficeDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // Real-time subscription for application updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('college-office-applications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'applications',
+          filter: 'status=eq.college_office_verification_pending'
+        },
+        () => {
+          fetchApplications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const fetchStaffProfile = async () => {
     if (!user?.id) return;
     
