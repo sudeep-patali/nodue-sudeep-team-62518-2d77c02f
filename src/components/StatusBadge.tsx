@@ -7,7 +7,7 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge = ({ status }: StatusBadgeProps) => {
-  const statusConfig: Record<ApplicationStatus, { label: string; variant: string; icon: React.ReactNode }> = {
+  const statusConfig: Record<string, { label: string; variant: string; icon: React.ReactNode }> = {
     pending: {
       label: 'Pending',
       variant: 'bg-warning/10 text-warning border-warning/20',
@@ -18,10 +18,20 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
       variant: 'bg-success/10 text-success border-success/20',
       icon: <CheckCircle2 className="h-3 w-3" />
     },
+    hostel_verification_pending: {
+      label: 'Hostel Verification Pending',
+      variant: 'bg-warning/10 text-warning border-warning/20',
+      icon: <Clock className="h-3 w-3" />
+    },
     hostel_verified: {
       label: 'Hostel Verified',
       variant: 'bg-success/10 text-success border-success/20',
       icon: <CheckCircle2 className="h-3 w-3" />
+    },
+    college_office_verification_pending: {
+      label: 'Office Verification Pending',
+      variant: 'bg-warning/10 text-warning border-warning/20',
+      icon: <Clock className="h-3 w-3" />
     },
     college_office_verified: {
       label: 'Office Verified',
@@ -60,7 +70,11 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
     }
   };
 
-  const config = statusConfig[status];
+  const config = statusConfig[status] || {
+    label: status || 'Unknown',
+    variant: 'bg-muted/10 text-muted-foreground border-muted/20',
+    icon: <AlertCircle className="h-3 w-3" />
+  };
 
   return (
     <Badge className={`${config.variant} flex items-center gap-1 px-2 py-1`} variant="outline">
