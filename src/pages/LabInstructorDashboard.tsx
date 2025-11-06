@@ -62,6 +62,7 @@ export default function LabInstructorDashboard() {
           profiles:student_id (name, usn, email, department, semester, photo, student_type)
         `)
         .eq('hod_verified', true)
+        .not('transaction_id', 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
