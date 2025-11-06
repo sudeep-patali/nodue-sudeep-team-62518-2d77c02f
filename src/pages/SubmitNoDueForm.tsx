@@ -277,10 +277,14 @@ const SubmitNoDueForm = () => {
       });
 
       // Notify all library staff
-      const { data: libraryStaff } = await supabase
+      const { data: libraryStaff, error: libraryStaffError } = await supabase
         .from('user_roles')
         .select('user_id')
         .eq('role', 'library');
+
+      if (libraryStaffError) {
+        console.error('Failed to fetch library staff:', libraryStaffError);
+      }
 
       if (libraryStaff && libraryStaff.length > 0) {
         const libraryNotifications = libraryStaff.map(staff => ({
@@ -292,9 +296,19 @@ const SubmitNoDueForm = () => {
           related_entity_id: appData.id
         }));
 
-        await supabase
+        console.log('Notifying library staff:', libraryStaff.length, 'staff members');
+        
+        const { error: notificationError } = await supabase
           .from('notifications')
           .insert(libraryNotifications);
+
+        if (notificationError) {
+          console.error('Failed to notify library staff:', notificationError);
+        } else {
+          console.log('Successfully notified library staff');
+        }
+      } else {
+        console.warn('No library staff found to notify');
       }
 
 
