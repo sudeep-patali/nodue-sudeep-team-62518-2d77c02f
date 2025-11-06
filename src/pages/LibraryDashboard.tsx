@@ -194,26 +194,50 @@ export default function LibraryDashboard() {
           related_entity_id: applicationId
         });
 
-      // Notify College Office staff when local students are approved
-      if (approved && application?.profiles?.student_type === 'local') {
-        const { data: collegeOfficeStaff } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'college_office');
+      // Notify next verifier when approved
+      if (approved) {
+        if (application?.profiles?.student_type === 'hostel') {
+          // Notify Hostel staff for hostel students
+          const { data: hostelStaff } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'hostel');
 
-        if (collegeOfficeStaff && collegeOfficeStaff.length > 0) {
-          const collegeOfficeNotifications = collegeOfficeStaff.map(staff => ({
-            user_id: staff.user_id,
-            title: 'New Application for Office Verification',
-            message: `${application.profiles.name} (${application.profiles.usn}) from ${application.department} - Semester ${application.semester} has been approved by Library and requires College Office verification.`,
-            type: 'info' as const,
-            related_entity_type: 'application',
-            related_entity_id: applicationId
-          }));
+          if (hostelStaff && hostelStaff.length > 0) {
+            const hostelNotifications = hostelStaff.map(staff => ({
+              user_id: staff.user_id,
+              title: 'New Application for Hostel Verification',
+              message: `${application.profiles.name} (${application.profiles.usn}) from ${application.department} - Semester ${application.semester} has been approved by Library and requires Hostel verification.`,
+              type: 'info' as const,
+              related_entity_type: 'application',
+              related_entity_id: applicationId
+            }));
 
-          await supabase
-            .from('notifications')
-            .insert(collegeOfficeNotifications);
+            await supabase
+              .from('notifications')
+              .insert(hostelNotifications);
+          }
+        } else {
+          // Notify College Office staff for local students
+          const { data: collegeOfficeStaff } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'college_office');
+
+          if (collegeOfficeStaff && collegeOfficeStaff.length > 0) {
+            const collegeOfficeNotifications = collegeOfficeStaff.map(staff => ({
+              user_id: staff.user_id,
+              title: 'New Application for Office Verification',
+              message: `${application.profiles.name} (${application.profiles.usn}) from ${application.department} - Semester ${application.semester} has been approved by Library and requires College Office verification.`,
+              type: 'info' as const,
+              related_entity_type: 'application',
+              related_entity_id: applicationId
+            }));
+
+            await supabase
+              .from('notifications')
+              .insert(collegeOfficeNotifications);
+          }
         }
       }
 
