@@ -401,7 +401,8 @@ export default function HODDashboard() {
     approved: teachingApplications.filter(a => {
       const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
       return allVerified;
-    }).length
+    }).length,
+    rejected: teachingApplications.filter(a => a.status === 'rejected').length
   };
 
   const currentApps = activeMode === 'teaching' ? teachingApplications : applications;
@@ -421,6 +422,9 @@ export default function HODDashboard() {
           const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
           return allVerified;
         });
+      }
+      if (activeTab === 'rejected') {
+        return teachingApplications.filter(a => a.status === 'rejected');
       }
       return [];
     } else {
@@ -551,17 +555,15 @@ export default function HODDashboard() {
             </CardContent>
           </Card>
 
-          {activeMode === 'hod' && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                <XCircle className="h-4 w-4 text-destructive" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{hodStats.rejected}</div>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+              <XCircle className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.rejected}</div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Info Card */}
@@ -597,7 +599,7 @@ export default function HODDashboard() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className={`grid w-full ${activeMode === 'hod' ? 'grid-cols-3' : 'grid-cols-2'}`}>
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="pending" className="gap-2">
                   <Clock className="h-4 w-4" />
                   Pending ({stats.pending})
@@ -606,12 +608,10 @@ export default function HODDashboard() {
                   <CheckCircle className="h-4 w-4" />
                   Approved ({stats.approved})
                 </TabsTrigger>
-                {activeMode === 'hod' && (
-                  <TabsTrigger value="rejected" className="gap-2">
-                    <XCircle className="h-4 w-4" />
-                    Rejected ({hodStats.rejected})
-                  </TabsTrigger>
-                )}
+                <TabsTrigger value="rejected" className="gap-2">
+                  <XCircle className="h-4 w-4" />
+                  Rejected ({stats.rejected})
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value={activeTab} className="mt-6">
