@@ -22,6 +22,7 @@ export default function HODDashboard() {
   // Mode and filter states
   const [activeMode, setActiveMode] = useState<DashboardMode>('hod');
   const [selectedSemester, setSelectedSemester] = useState<string>("all");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("pending");
   
   // Application states
@@ -64,7 +65,7 @@ export default function HODDashboard() {
       supabase.removeChannel(channel);
       supabase.removeChannel(channel2);
     };
-  }, [profile, activeMode, selectedSemester]);
+  }, [profile, activeMode, selectedSemester, selectedDepartment]);
 
   const fetchApplications = async () => {
     if (!profile?.department) {
@@ -120,11 +121,12 @@ export default function HODDashboard() {
           })
         );
 
-        // Filter by college office verification and semester
+        // Filter by college office verification, semester, and department
         const filteredTeaching = enrichedAssignments.filter(assignment => {
           const app = assignment.applications;
           return app?.college_office_verified === true && 
-                 (selectedSemester === 'all' || app?.semester?.toString() === selectedSemester);
+                 (selectedSemester === 'all' || app?.semester?.toString() === selectedSemester) &&
+                 (selectedDepartment === 'all' || app?.profiles?.department === selectedDepartment);
         });
 
         // Group by application ID (same as Faculty Dashboard)
@@ -491,31 +493,57 @@ export default function HODDashboard() {
           </CardContent>
         </Card>
 
-        {/* Semester Filter */}
+        {/* Filters */}
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <GraduationCap className="h-5 w-5 text-muted-foreground" />
-              <div className="flex-1">
-                <label className="text-sm font-medium">Filter by Semester</label>
-                <p className="text-xs text-muted-foreground">View applications from specific semester</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex items-center gap-4">
+                <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <label className="text-sm font-medium">Filter by Semester</label>
+                  <p className="text-xs text-muted-foreground">View applications from specific semester</p>
+                </div>
+                <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Semesters</SelectItem>
+                    <SelectItem value="1">Semester 1</SelectItem>
+                    <SelectItem value="2">Semester 2</SelectItem>
+                    <SelectItem value="3">Semester 3</SelectItem>
+                    <SelectItem value="4">Semester 4</SelectItem>
+                    <SelectItem value="5">Semester 5</SelectItem>
+                    <SelectItem value="6">Semester 6</SelectItem>
+                    <SelectItem value="7">Semester 7</SelectItem>
+                    <SelectItem value="8">Semester 8</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Semesters</SelectItem>
-                  <SelectItem value="1">Semester 1</SelectItem>
-                  <SelectItem value="2">Semester 2</SelectItem>
-                  <SelectItem value="3">Semester 3</SelectItem>
-                  <SelectItem value="4">Semester 4</SelectItem>
-                  <SelectItem value="5">Semester 5</SelectItem>
-                  <SelectItem value="6">Semester 6</SelectItem>
-                  <SelectItem value="7">Semester 7</SelectItem>
-                  <SelectItem value="8">Semester 8</SelectItem>
-                </SelectContent>
-              </Select>
+
+              {activeMode === 'teaching' && (
+                <div className="flex items-center gap-4">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <label className="text-sm font-medium">Filter by Department</label>
+                    <p className="text-xs text-muted-foreground">View applications from specific branch</p>
+                  </div>
+                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      <SelectItem value="CSE">CSE</SelectItem>
+                      <SelectItem value="AIML">AIML</SelectItem>
+                      <SelectItem value="CD">CD</SelectItem>
+                      <SelectItem value="EC">EC</SelectItem>
+                      <SelectItem value="MECH">MECH</SelectItem>
+                      <SelectItem value="CIVIL">CIVIL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
