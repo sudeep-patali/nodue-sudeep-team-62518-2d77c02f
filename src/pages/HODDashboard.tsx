@@ -35,7 +35,7 @@ export default function HODDashboard() {
   useEffect(() => {
     fetchApplications();
     
-    // Real-time subscription
+    // Real-time subscription for applications
     const channel = supabase
       .channel('hod-applications')
       .on('postgres_changes', {
@@ -47,7 +47,23 @@ export default function HODDashboard() {
       })
       .subscribe();
     
-    return () => { supabase.removeChannel(channel); };
+    // Real-time subscription for teaching mode faculty assignments
+    const channel2 = supabase
+      .channel('hod-teaching-assignments')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'application_subject_faculty',
+        filter: `faculty_id=eq.${user?.id}`
+      }, () => {
+        fetchApplications();
+      })
+      .subscribe();
+    
+    return () => { 
+      supabase.removeChannel(channel);
+      supabase.removeChannel(channel2);
+    };
   }, [profile, activeMode, selectedSemester]);
 
   const fetchApplications = async () => {
@@ -111,7 +127,28 @@ export default function HODDashboard() {
                  (selectedSemester === 'all' || app?.semester?.toString() === selectedSemester);
         });
 
-        setTeachingApplications(filteredTeaching);
+        // Group by application ID (same as Faculty Dashboard)
+        const applicationMap = new Map();
+        filteredTeaching.forEach(assignment => {
+          const appId = assignment.application_id;
+          if (!applicationMap.has(appId)) {
+            applicationMap.set(appId, {
+              ...assignment.applications,
+              faculty_assignments: []
+            });
+          }
+          applicationMap.get(appId).faculty_assignments.push({
+            id: assignment.id,
+            subject_id: assignment.subject_id,
+            subject_name: assignment.subjects?.name,
+            subject_code: assignment.subjects?.code,
+            faculty_verified: assignment.faculty_verified,
+            faculty_comment: assignment.faculty_comment,
+            verified_at: assignment.verified_at
+          });
+        });
+
+        setTeachingApplications(Array.from(applicationMap.values()));
       } else {
         // HOD Mode: Fetch applications ready for HOD verification
         let query = supabase
@@ -150,25 +187,106 @@ export default function HODDashboard() {
     }
   };
 
-  const handleTeachingVerification = async (assignmentId: string, verified: boolean) => {
+  const handleTeachingVerification = async (applicationId: string, approved: boolean) => {
     setProcessing(true);
     try {
-      const updateData = {
-        faculty_verified: verified,
-        faculty_comment: comment || null,
-        verified_at: verified ? new Date().toISOString() : null
-      };
-
-      const { error } = await supabase
+      // Update all faculty assignments for this application and current HOD (as faculty)
+      const assignmentsToUpdate = selectedApp.faculty_assignments.map((a: any) => a.id);
+      
+      const { error: updateError } = await supabase
         .from('application_subject_faculty')
-        .update(updateData)
-        .eq('id', assignmentId);
+        .update({
+          faculty_verified: approved,
+          faculty_comment: comment || null,
+          verified_at: approved ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
+        })
+        .in('id', assignmentsToUpdate);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Check if ALL faculty members have verified this application
+      const { data: allAssignments, error: checkError } = await supabase
+        .from('application_subject_faculty')
+        .select('faculty_verified')
+        .eq('application_id', applicationId);
+
+      if (checkError) throw checkError;
+
+      const allVerified = allAssignments?.every(a => a.faculty_verified === true);
+
+      // If all faculty have verified OR if rejected, update the main application
+      if (allVerified || !approved) {
+        const { error: appError } = await supabase
+          .from('applications')
+          .update({
+            faculty_verified: approved && allVerified,
+            faculty_comment: comment || null,
+            status: !approved ? 'rejected' : (allVerified ? 'faculty_verified' : 'college_office_verified'),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', applicationId);
+
+        if (appError) throw appError;
+
+        // Notify student
+        const notificationMessage = !approved 
+          ? `Your application was rejected by faculty (${profile?.name}). Reason: ${comment || 'Not specified'}`
+          : allVerified 
+            ? `All faculty members have verified your subjects. Your application is now proceeding to HOD verification.`
+            : `Faculty verification in progress.`;
+
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: selectedApp.student_id,
+            title: !approved ? 'Application Rejected' : allVerified ? 'All Faculty Verified' : 'Faculty Verification Update',
+            message: notificationMessage,
+            type: !approved ? 'rejection' : 'approval',
+            related_entity_type: 'application',
+            related_entity_id: applicationId
+          });
+
+        // Notify HOD (for HOD mode verification) when all faculty have verified
+        if (approved && allVerified) {
+          const { data: hodStaff } = await supabase
+            .from('staff_profiles')
+            .select('id')
+            .eq('department', selectedApp.department)
+            .eq('designation', 'HOD')
+            .eq('is_active', true)
+            .single();
+
+          if (hodStaff) {
+            await supabase
+              .from('notifications')
+              .insert({
+                user_id: hodStaff.id,
+                title: 'Application Ready for HOD Verification',
+                message: `${selectedApp.profiles.name} (${selectedApp.profiles.usn}) from ${selectedApp.department} - Semester ${selectedApp.profiles.semester} has been verified by all faculty members and is ready for HOD verification.`,
+                type: 'info',
+                related_entity_type: 'application',
+                related_entity_id: applicationId
+              });
+          }
+        }
+      } else {
+        // Partial verification notification
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: selectedApp.student_id,
+            title: 'Subject Verification Completed',
+            message: `${profile?.name || 'A faculty member'} has verified your subjects. Waiting for other faculty verifications.`,
+            type: 'info',
+            related_entity_type: 'application',
+            related_entity_id: applicationId
+          });
+      }
 
       toast({
         title: "Success!",
-        description: `Subject verification ${verified ? 'approved' : 'rejected'}`,
+        description: `Subjects ${approved ? 'verified' : 'rejected'} successfully`,
       });
 
       setComment("");
@@ -276,8 +394,14 @@ export default function HODDashboard() {
   // Teaching Mode Stats
   const teachingStats = {
     total: teachingApplications.length,
-    pending: teachingApplications.filter(a => !a.faculty_verified).length,
-    approved: teachingApplications.filter(a => a.faculty_verified).length
+    pending: teachingApplications.filter(a => {
+      const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+      return !allVerified && a.status !== 'rejected';
+    }).length,
+    approved: teachingApplications.filter(a => {
+      const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+      return allVerified;
+    }).length
   };
 
   const currentApps = activeMode === 'teaching' ? teachingApplications : applications;
@@ -286,8 +410,18 @@ export default function HODDashboard() {
   // Filter applications by tab
   const getFilteredApps = () => {
     if (activeMode === 'teaching') {
-      if (activeTab === 'pending') return teachingApplications.filter(a => !a.faculty_verified);
-      if (activeTab === 'approved') return teachingApplications.filter(a => a.faculty_verified);
+      if (activeTab === 'pending') {
+        return teachingApplications.filter(a => {
+          const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+          return !allVerified && a.status !== 'rejected';
+        });
+      }
+      if (activeTab === 'approved') {
+        return teachingApplications.filter(a => {
+          const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+          return allVerified;
+        });
+      }
       return [];
     } else {
       if (activeTab === 'pending') return applications.filter(a => !a.hod_verified && a.status !== 'rejected');
@@ -492,7 +626,7 @@ export default function HODDashboard() {
                         <TableHead>Student Name</TableHead>
                         <TableHead>USN</TableHead>
                         <TableHead>Semester</TableHead>
-                        {activeMode === 'teaching' && <TableHead>Subject</TableHead>}
+                        {activeMode === 'teaching' && <TableHead>Subjects</TableHead>}
                         <TableHead>Status</TableHead>
                         <TableHead>Submitted</TableHead>
                         <TableHead>Action</TableHead>
@@ -500,24 +634,22 @@ export default function HODDashboard() {
                     </TableHeader>
                     <TableBody>
                       {filteredApps.map((item) => {
-                        const app = activeMode === 'teaching' ? item.applications : item;
-                        const profile = app.profiles || app.student_profile;
+                        const app = activeMode === 'teaching' ? item : item;
+                        const studentProfile = activeMode === 'teaching' ? item.profiles : item.profiles;
                         
                         return (
                           <TableRow key={item.id}>
-                            <TableCell className="font-medium">{profile?.name}</TableCell>
-                            <TableCell className="font-mono text-sm">{profile?.usn}</TableCell>
+                            <TableCell className="font-medium">{studentProfile?.name}</TableCell>
+                            <TableCell className="font-mono text-sm">{studentProfile?.usn}</TableCell>
                             <TableCell>{app.semester}</TableCell>
                             {activeMode === 'teaching' && (
                               <TableCell className="text-sm">
-                                {item.subjects?.name}
-                                <br />
-                                <span className="text-xs text-muted-foreground">{item.subjects?.code}</span>
+                                {item.faculty_assignments?.length || 0} subject(s)
                               </TableCell>
                             )}
                             <TableCell>
                               {activeMode === 'teaching' ? (
-                                item.faculty_verified ? (
+                                item.faculty_assignments?.every((fa: any) => fa.faculty_verified) ? (
                                   <Badge variant="default">Verified</Badge>
                                 ) : (
                                   <Badge variant="secondary">Pending</Badge>
@@ -537,7 +669,7 @@ export default function HODDashboard() {
                             </TableCell>
                             <TableCell>
                               {activeMode === 'teaching' ? (
-                                !item.faculty_verified && (
+                                !item.faculty_assignments?.every((fa: any) => fa.faculty_verified) && (
                                   <Button size="sm" onClick={() => setSelectedApp(item)}>
                                     Review
                                   </Button>
@@ -578,17 +710,32 @@ export default function HODDashboard() {
               </CardTitle>
               <CardDescription>
                 {activeMode === 'teaching' ? (
-                  <>
-                    Student: {selectedApp.applications?.profiles?.name} ({selectedApp.applications?.profiles?.usn})
-                    <br />
-                    Subject: {selectedApp.subjects?.name} ({selectedApp.subjects?.code})
-                  </>
+                  <>Student: {selectedApp.profiles?.name} ({selectedApp.profiles?.usn})</>
                 ) : (
                   <>Student: {selectedApp.profiles?.name} ({selectedApp.profiles?.usn})</>
                 )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {activeMode === 'teaching' && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Subjects to Verify:</h4>
+                  {selectedApp.faculty_assignments?.map((assignment: any, idx: number) => (
+                    <div key={assignment.id} className="p-3 bg-muted rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{assignment.subject_name}</p>
+                          <p className="text-xs text-muted-foreground">{assignment.subject_code}</p>
+                        </div>
+                        {assignment.faculty_verified && (
+                          <Badge variant="default">Verified</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {activeMode === 'hod' && (
                 <div className="p-4 bg-muted rounded-lg">
                   <h4 className="font-semibold mb-2">Verification Trail</h4>
@@ -646,7 +793,7 @@ export default function HODDashboard() {
                       className="flex-1"
                     >
                       <CheckCircle className="mr-2 h-4 w-4" />
-                      Approve Subject
+                      Approve All Subjects
                     </Button>
                     <Button
                       variant="destructive"
