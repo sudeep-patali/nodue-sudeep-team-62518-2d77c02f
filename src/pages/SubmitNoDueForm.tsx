@@ -288,15 +288,16 @@ const SubmitNoDueForm = () => {
 
       if (libraryStaff && libraryStaff.length > 0) {
         const libraryNotifications = libraryStaff.map(staff => ({
-          user_id: staff.user_id,
+          user_id: String(staff.user_id),
           title: 'New No-Due Application',
           message: `${profile.name} (${profile.usn}) from ${department} - Semester ${semester} has submitted a No-Due application for review.`,
           type: 'info' as const,
           related_entity_type: 'application',
-          related_entity_id: appData.id
+          related_entity_id: String(appData.id)
         }));
 
         console.log('Notifying library staff:', libraryStaff.length, 'staff members');
+        console.log('Notification data:', JSON.stringify(libraryNotifications, null, 2));
         
         const { error: notificationError } = await supabase.rpc('create_bulk_notifications', {
           notifications: libraryNotifications
@@ -304,6 +305,7 @@ const SubmitNoDueForm = () => {
 
         if (notificationError) {
           console.error('Failed to notify library staff:', notificationError);
+          console.error('Error details:', JSON.stringify(notificationError, null, 2));
         } else {
           console.log('Successfully notified library staff');
         }
