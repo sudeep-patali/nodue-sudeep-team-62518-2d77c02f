@@ -106,55 +106,6 @@ const Index = () => {
             Select your role below to access your portal
           </p>
         </div>
-
-        {/* Test Credentials Banner */}
-        <div className="max-w-2xl mx-auto mb-8 space-y-4">
-          <Card className="border-primary/50 bg-primary/5">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Demo Credentials
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex gap-2">
-                  <span className="font-medium">Admin Login:</span>
-                  <span className="text-muted-foreground">admin@nodex.edu / Admin@123456</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  💡 You can also create a new admin account using the registration link on the admin login page
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Staff Login Information
-              </h3>
-              <div className="space-y-2 text-sm">
-                <p className="text-muted-foreground">
-                  <strong>For Faculty & Staff:</strong> Login credentials are set by the admin when your account is created.
-                </p>
-                <div className="flex gap-2">
-                  <span className="font-medium">Login ID:</span>
-                  <span className="text-muted-foreground">Your email address</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-medium">Password:</span>
-                  <span className="text-muted-foreground">Your employee ID</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  📧 Contact your admin if you don't have your credentials
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Role Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {roles.map((role) => {
