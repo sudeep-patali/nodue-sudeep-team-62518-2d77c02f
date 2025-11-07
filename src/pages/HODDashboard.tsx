@@ -350,9 +350,7 @@ export default function HODDashboard() {
       // Notify Lab Instructor when HOD approves
       if (approved) {
         const { data: labInstructors } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'lab_instructor');
+          .rpc('get_users_by_role', { role_name: 'lab_instructor' });
 
         if (labInstructors && labInstructors.length > 0) {
           const { data: deptLabInstructors } = await supabase

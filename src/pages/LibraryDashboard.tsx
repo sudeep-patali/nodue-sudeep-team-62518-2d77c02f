@@ -199,9 +199,7 @@ export default function LibraryDashboard() {
         if (application?.profiles?.student_type === 'hostel') {
           // Notify Hostel staff for hostel students
           const { data: hostelStaff } = await supabase
-            .from('user_roles')
-            .select('user_id')
-            .eq('role', 'hostel');
+            .rpc('get_users_by_role', { role_name: 'hostel' });
 
           if (hostelStaff && hostelStaff.length > 0) {
             const hostelNotifications = hostelStaff.map(staff => ({
@@ -224,9 +222,7 @@ export default function LibraryDashboard() {
         } else {
           // Notify College Office staff for local students
           const { data: collegeOfficeStaff } = await supabase
-            .from('user_roles')
-            .select('user_id')
-            .eq('role', 'college_office');
+            .rpc('get_users_by_role', { role_name: 'college_office' });
 
           if (collegeOfficeStaff && collegeOfficeStaff.length > 0) {
             const collegeOfficeNotifications = collegeOfficeStaff.map(staff => ({

@@ -118,9 +118,7 @@ export default function HostelDashboard() {
       // Notify College Office staff when hostel students are approved
       if (approved) {
         const { data: collegeOfficeStaff } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', 'college_office');
+          .rpc('get_users_by_role', { role_name: 'college_office' });
 
         if (collegeOfficeStaff && collegeOfficeStaff.length > 0) {
           const collegeOfficeNotifications = collegeOfficeStaff.map(staff => ({
