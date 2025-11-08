@@ -137,15 +137,20 @@ const ApplicationTracker = () => {
 
   const calculateProgress = (app: any) => {
     let completed = 0;
-    const total = 6;
-
+    let total = 5; // Base verifications (library, college_office, hod, payment, lab)
+    
+    // Add hostel to total only if student is a hostel student
+    if (app.profiles?.student_type === 'hostel') {
+      total = 6;
+      if (app.hostel_verified) completed++;
+    }
+    
     if (app.library_verified) completed++;
-    if (app.hostel_verified) completed++;
     if (app.college_office_verified) completed++;
     if (app.hod_verified) completed++;
     if (app.payment_verified) completed++;
     if (app.lab_verified) completed++;
-
+    
     return Math.round((completed / total) * 100);
   };
 
@@ -167,7 +172,7 @@ const ApplicationTracker = () => {
     },
     { 
       title: "In Progress", 
-      value: applications.filter(a => a.status === 'pending').length, 
+      value: applications.filter(a => a.status !== 'completed' && a.status !== 'rejected').length, 
       icon: Clock, 
       color: "text-warning" 
     },
