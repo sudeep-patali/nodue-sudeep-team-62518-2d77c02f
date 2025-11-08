@@ -70,7 +70,7 @@ export default function LabInstructorProfile() {
       <DashboardHeader user={staffProfile ? { ...staffProfile, role: "Lab Instructor" } : user} title="My Profile" />
 
       <main className="container mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={() => navigate("/lab-instructor")} className="mb-6">
+        <Button variant="outline" onClick={() => navigate("/lab-instructor")} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
