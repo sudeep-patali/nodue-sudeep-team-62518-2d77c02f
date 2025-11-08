@@ -35,6 +35,32 @@ const ApplicationTracker = () => {
     }
   }, [selectedBatch, selectedDepartment]);
 
+  // Real-time subscription for application updates
+  useEffect(() => {
+    if (!selectedBatch || !selectedDepartment) return;
+
+    const channel = supabase
+      .channel('application-tracker-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'applications',
+          filter: `batch=eq.${selectedBatch},department=eq.${selectedDepartment}`
+        },
+        (payload) => {
+          console.log('Application change detected:', payload);
+          fetchApplications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedBatch, selectedDepartment]);
+
   const fetchBatches = async () => {
     try {
       const { data, error } = await supabase
