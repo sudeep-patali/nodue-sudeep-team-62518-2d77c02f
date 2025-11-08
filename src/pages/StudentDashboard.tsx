@@ -170,9 +170,14 @@ const StudentDashboard = () => {
             .eq('application_id', app.id)
             .order('created_at', { ascending: true });
           
+          // Filter out assignments with missing subject or faculty data
+          const validAssignments = (facultyAssignments || []).filter(
+            assignment => assignment.subjects && assignment.staff_profiles
+          );
+          
           return {
             ...app,
-            faculty_assignments: facultyAssignments || []
+            faculty_assignments: validAssignments
           };
         })
       );
@@ -593,51 +598,64 @@ const StudentDashboard = () => {
                         {/* Detailed Faculty Assignments */}
                         {expandedFaculty && (
                           <div className="space-y-3 mt-3 pl-4">
-                            {currentApplication.faculty_assignments.map((assignment) => (
-                              <div key={assignment.id} className="border rounded-lg p-4 bg-card">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <p className="font-semibold">
-                                        {assignment.subjects.name} ({assignment.subjects.code})
-                                      </p>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">
-                                      Faculty: {assignment.staff_profiles.name}
-                                      <span className="ml-2 text-xs">
-                                        ({assignment.staff_profiles.designation}, {assignment.staff_profiles.department})
-                                      </span>
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-col items-end gap-1">
-                                    {assignment.faculty_verified ? (
-                                      <>
-                                        <Badge className="bg-success/10 text-success border-success/20">
-                                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                                          Verified
-                                        </Badge>
-                                        {assignment.verified_at && (
-                                          <p className="text-xs text-muted-foreground">
-                                            {new Date(assignment.verified_at).toLocaleDateString()}
+                            {currentApplication.faculty_assignments.length > 0 ? (
+                              currentApplication.faculty_assignments.map((assignment) => {
+                                // Additional safety check
+                                if (!assignment.subjects || !assignment.staff_profiles) {
+                                  return null;
+                                }
+                                
+                                return (
+                                  <div key={assignment.id} className="border rounded-lg p-4 bg-card">
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <p className="font-semibold">
+                                            {assignment.subjects.name} ({assignment.subjects.code})
                                           </p>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Faculty: {assignment.staff_profiles.name}
+                                          <span className="ml-2 text-xs">
+                                            ({assignment.staff_profiles.designation}, {assignment.staff_profiles.department})
+                                          </span>
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-col items-end gap-1">
+                                        {assignment.faculty_verified ? (
+                                          <>
+                                            <Badge className="bg-success/10 text-success border-success/20">
+                                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                                              Verified
+                                            </Badge>
+                                            {assignment.verified_at && (
+                                              <p className="text-xs text-muted-foreground">
+                                                {new Date(assignment.verified_at).toLocaleDateString()}
+                                              </p>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                                            <Clock className="h-3 w-3 mr-1" />
+                                            Pending
+                                          </Badge>
                                         )}
-                                      </>
-                                    ) : (
-                                      <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                                        <Clock className="h-3 w-3 mr-1" />
-                                        Pending
-                                      </Badge>
+                                      </div>
+                                    </div>
+                                    {assignment.faculty_comment && (
+                                      <div className="mt-3 p-2 bg-muted/50 rounded text-sm">
+                                        <p className="text-xs text-muted-foreground mb-1">Faculty Comment:</p>
+                                        <p>{assignment.faculty_comment}</p>
+                                      </div>
                                     )}
                                   </div>
-                                </div>
-                                {assignment.faculty_comment && (
-                                  <div className="mt-3 p-2 bg-muted/50 rounded text-sm">
-                                    <p className="text-xs text-muted-foreground mb-1">Faculty Comment:</p>
-                                    <p>{assignment.faculty_comment}</p>
-                                  </div>
-                                )}
+                                );
+                              })
+                            ) : (
+                              <div className="text-center py-4 text-muted-foreground text-sm">
+                                No faculty assignments found
                               </div>
-                            ))}
+                            )}
                           </div>
                         )}
                       </div>
