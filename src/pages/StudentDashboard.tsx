@@ -341,7 +341,7 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10">
       <DashboardHeader 
         title="Student Dashboard"
         user={{
@@ -351,48 +351,39 @@ const StudentDashboard = () => {
         }}
       />
 
-      <div className="container mx-auto p-4 md:p-6 space-y-6">
+      <div className="container mx-auto p-6">
         {/* Profile Summary Card */}
-        <Card className="border-none shadow-xl bg-gradient-to-r from-primary/10 to-secondary/10 animate-fade-in">
-          <CardContent className="p-6 md:p-8">
+        <Card className="mb-6 border-2 shadow-lg">
+          <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="relative group">
-                <Avatar className="h-28 w-28 border-4 border-primary/30 shadow-lg transition-transform group-hover:scale-105">
-                  {profile.photo ? (
-                    <AvatarImage src={profile.photo} alt={profile.name} />
-                  ) : (
-                    <AvatarFallback className="text-4xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-                      {getInitials(profile.name)}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl -z-10 group-hover:bg-primary/20 transition-colors" />
-              </div>
+              <Avatar className="h-24 w-24 border-4 border-primary/20">
+                {profile.photo ? (
+                  <AvatarImage src={profile.photo} alt={profile.name} />
+                ) : (
+                  <AvatarFallback className="text-3xl bg-primary text-primary-foreground">
+                    {getInitials(profile.name)}
+                  </AvatarFallback>
+                )}
+              </Avatar>
               
               <div className="flex-1 text-center md:text-left">
-                <h2 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Welcome, {profile.name}!
-                </h2>
-                <div className="space-y-2 text-muted-foreground">
-                  <p className="text-xl font-semibold text-foreground">{profile.usn}</p>
-                  <p className="text-base">
-                    <span className="font-medium text-foreground">{profile.department}</span> - Section {profile.section} • Semester {profile.semester}
-                  </p>
-                  <p className="text-sm">{profile.email}</p>
-                  <p className="text-sm">
-                    <span className="capitalize font-medium text-foreground">{profile.student_type}</span> Student • Batch {profile.batch}
-                  </p>
+                <h2 className="text-3xl font-bold mb-2">Welcome, {profile.name}!</h2>
+                <div className="space-y-1 text-muted-foreground">
+                  <p className="text-lg font-semibold text-foreground">{profile.usn}</p>
+                  <p>{profile.department} - Section {profile.section} • Semester {profile.semester}</p>
+                  <p>{profile.email}</p>
+                  <p className="capitalize">{profile.student_type} Student • Batch {profile.batch}</p>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={() => navigate('/student/profile')} variant="outline" size="sm" className="hover-scale">
+                <Button onClick={() => navigate('/student/profile')} variant="outline" size="sm">
                   <User className="h-4 w-4 mr-2" />
                   View Profile
                 </Button>
-                <Button onClick={() => navigate('/student/edit-profile')} variant="default" size="sm" className="hover-scale">
+                <Button onClick={() => navigate('/student/edit-profile')} variant="outline" size="sm">
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  Edit Profile
                 </Button>
               </div>
             </div>
@@ -400,26 +391,18 @@ const StudentDashboard = () => {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-          {stats.map((stat, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {stats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <Card 
-                key={stat.title} 
-                className="group hover:shadow-xl transition-all duration-300 border-none shadow-lg hover:-translate-y-1 animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+              <Card key={stat.title} className="hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{stat.title}</p>
-                      <p className="text-5xl font-bold bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        {stat.value}
-                      </p>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{stat.title}</p>
+                      <p className="text-4xl font-bold mt-1">{stat.value}</p>
                     </div>
-                    <div className={`h-16 w-16 rounded-2xl ${stat.color} bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <Icon className={`h-8 w-8 ${stat.color}`} />
-                    </div>
+                    <Icon className={`h-12 w-12 ${stat.color}`} />
                   </div>
                 </CardContent>
               </Card>
@@ -429,15 +412,13 @@ const StudentDashboard = () => {
 
         {/* Submission Not Available Alert */}
         {!submissionsAllowed && (
-          <Card className="border-warning/50 bg-gradient-to-r from-warning/10 to-warning/5 shadow-lg animate-fade-in">
+          <Card className="mb-6 border-2 border-warning bg-warning/5">
             <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="h-6 w-6 text-warning" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-lg mb-2 text-warning">Submissions Not Available</h4>
-                  <p className="text-sm text-foreground/80">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-6 w-6 text-warning flex-shrink-0 mt-1" />
+                <div>
+                  <h4 className="font-semibold text-lg mb-1">Submissions Not Available</h4>
+                  <p className="text-sm text-muted-foreground">
                     {submissionMessage}
                   </p>
                 </div>
@@ -447,87 +428,73 @@ const StudentDashboard = () => {
         )}
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Button 
             size="lg" 
-            className="h-28 text-lg font-semibold shadow-lg hover:shadow-xl transition-all group hover-scale"
+            className="h-24 text-lg"
             onClick={() => navigate('/student/submit-form')}
             disabled={!submissionsAllowed}
           >
-            <div className="flex flex-col items-center gap-2">
-              <Plus className="h-7 w-7 group-hover:rotate-90 transition-transform" />
-              <span>Submit No-Due Application</span>
-            </div>
+            <Plus className="h-6 w-6 mr-2" />
+            Submit No-Due Application
           </Button>
           
           <Button 
             size="lg" 
             variant="outline" 
-            className="h-28 text-lg font-semibold shadow-lg hover:shadow-xl transition-all group hover-scale border-2"
+            className="h-24 text-lg"
             disabled={!currentApplication || !currentApplication.hod_verified || currentApplication.payment_verified}
             onClick={() => navigate('/student/lab-payment')}
           >
-            <div className="flex flex-col items-center gap-2">
-              <CreditCard className="h-7 w-7 group-hover:scale-110 transition-transform" />
-              <span>Lab Charge Payment</span>
-            </div>
+            <CreditCard className="h-6 w-6 mr-2" />
+            Lab Charge Payment
           </Button>
 
           <Button 
             size="lg" 
             variant="outline" 
-            className="h-28 text-lg font-semibold shadow-lg hover:shadow-xl transition-all group hover-scale border-2"
+            className="h-24 text-lg"
             disabled={!currentApplication || !currentApplication.lab_verified}
             onClick={handleCertificateDownload}
           >
-            <div className="flex flex-col items-center gap-2">
-              <Download className="h-7 w-7 group-hover:translate-y-1 transition-transform" />
-              <span>Download Certificate</span>
-            </div>
+            <Download className="h-6 w-6 mr-2" />
+            Download Certificate
           </Button>
         </div>
 
         {/* Current Application Status */}
         {currentApplication && (
-          <Card className="shadow-xl border-none bg-gradient-to-br from-card to-card/80 animate-fade-in">
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <Card className="mb-6 shadow-lg">
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl">Current Application Status</CardTitle>
-                  <CardDescription className="text-base mt-1">Track your No-Due application progress</CardDescription>
+                  <CardTitle>Current Application Status</CardTitle>
+                  <CardDescription>Track your No-Due application progress</CardDescription>
                 </div>
                 <StatusBadge status={currentApplication.status as any} />
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Submitted {new Date(currentApplication.created_at).toLocaleDateString()}
+            <CardContent>
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">
+                    Submitted on {new Date(currentApplication.created_at).toLocaleDateString()}
                   </span>
-                  <span className="text-lg font-bold text-primary">
-                    {Math.round(calculateProgress(currentApplication))}%
+                  <span className="text-sm font-semibold">
+                    {Math.round(calculateProgress(currentApplication))}% Complete
                   </span>
                 </div>
-                <Progress value={calculateProgress(currentApplication)} className="h-3 shadow-inner" />
+                <Progress value={calculateProgress(currentApplication)} className="h-2" />
               </div>
 
               {/* Verification Steps */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {verificationSteps.map((step, index) => {
                   if (!step.required) return null;
                   
                   return (
-                    <div 
-                      key={step.name} 
-                      className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
-                        step.verified 
-                          ? 'bg-gradient-to-r from-success/5 to-success/10 border-success/30' 
-                          : 'bg-muted/30 border-muted-foreground/20'
-                      }`}
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${
+                    <div key={step.name} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                         step.verified 
                           ? 'bg-success/20 text-success' 
                           : 'bg-muted text-muted-foreground'
@@ -539,19 +506,18 @@ const StudentDashboard = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-base mb-1">
+                        <p className="font-semibold text-base">
                           {step.name} Verification
                         </p>
                         {step.verified ? (
-                          <p className="text-sm text-success font-semibold">✓ Verified</p>
+                          <p className="text-sm text-success mt-1">✓ Verified</p>
                         ) : (
-                          <p className="text-sm text-muted-foreground">Awaiting verification</p>
+                          <p className="text-sm text-muted-foreground mt-1">Pending verification</p>
                         )}
                         {step.comment && (
-                          <div className="mt-3 p-3 bg-background/60 rounded-lg border">
-                            <p className="text-xs font-semibold text-muted-foreground mb-1">Comment:</p>
-                            <p className="text-sm text-foreground">{step.comment}</p>
-                          </div>
+                          <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
+                            Comment: {step.comment}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -561,18 +527,16 @@ const StudentDashboard = () => {
 
               {/* Payment Reminder */}
               {currentApplication.hod_verified && !currentApplication.payment_verified && (
-                <div className="p-5 bg-gradient-to-r from-warning/10 to-warning/5 rounded-xl border-2 border-warning/50 shadow-lg animate-fade-in">
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
-                      <AlertCircle className="h-6 w-6 text-warning" />
-                    </div>
+                <div className="mt-6 p-4 bg-warning/10 rounded-lg border-2 border-warning">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-6 w-6 text-warning mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <h4 className="font-bold text-warning text-lg mb-2">Lab Charge Payment Required</h4>
-                      <p className="text-sm text-foreground/90 mb-4">
+                      <h4 className="font-bold text-warning text-lg">Lab Charge Payment Required</h4>
+                      <p className="text-sm text-foreground mt-2">
                         Your application has been approved by the HOD. Please proceed with the lab charge payment to continue.
                       </p>
                       <Button 
-                        className="hover-scale shadow-md" 
+                        className="mt-3" 
                         onClick={() => navigate('/student/lab-payment')}
                       >
                         <CreditCard className="h-4 w-4 mr-2" />
@@ -588,23 +552,15 @@ const StudentDashboard = () => {
 
         {/* No Active Application */}
         {!currentApplication && (
-          <Card className="border-2 border-dashed border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5 animate-fade-in">
-            <CardContent className="pt-6 text-center py-16">
-              <div className="relative inline-block mb-6">
-                <FileText className="h-20 w-20 text-primary/40" />
-                <div className="absolute inset-0 blur-xl bg-primary/20 -z-10" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">No Active Application</h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                You haven't submitted a No-Due application yet. Get started by submitting your first application.
+          <Card className="mb-6 border-2 border-dashed">
+            <CardContent className="pt-6 text-center py-12">
+              <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No Active Application</h3>
+              <p className="text-muted-foreground mb-4">
+                You haven't submitted a No-Due application yet.
               </p>
-              <Button 
-                size="lg" 
-                onClick={() => navigate('/student/submit-form')}
-                className="hover-scale shadow-lg"
-                disabled={!submissionsAllowed}
-              >
-                <Plus className="h-5 w-5 mr-2" />
+              <Button onClick={() => navigate('/student/submit-form')}>
+                <Plus className="h-4 w-4 mr-2" />
                 Submit Your First Application
               </Button>
             </CardContent>
@@ -612,53 +568,48 @@ const StudentDashboard = () => {
         )}
 
         {/* Recent Notifications */}
-        <Card className="shadow-xl border-none animate-fade-in">
-          <CardHeader className="pb-4">
+        <Card className="shadow-lg">
+          <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Bell className="h-5 w-5 text-primary" />
-                </div>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
                 Recent Notifications
                 {unreadCount > 0 && (
-                  <span className="bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
+                  <span className="bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full">
                     {unreadCount} new
                   </span>
                 )}
               </CardTitle>
-              <Button variant="link" onClick={() => navigate('/student/notifications')} className="text-primary hover:text-primary/80">
-                View All →
+              <Button variant="link" onClick={() => navigate('/student/notifications')}>
+                View All
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             {notifications.length > 0 ? (
               <div className="space-y-3">
-                {notifications.slice(0, 5).map((notification, index) => (
+                {notifications.slice(0, 5).map((notification) => (
                   <div 
                     key={notification.id} 
-                    className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
-                      !notification.read 
-                        ? 'bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30' 
-                        : 'bg-muted/30 border-muted-foreground/20'
+                    className={`flex items-start gap-3 p-3 rounded-lg border ${
+                      !notification.read ? 'bg-primary/5 border-primary/20' : 'bg-muted/50'
                     }`}
-                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                       notification.type === 'approval' ? 'bg-success/20 text-success' :
                       notification.type === 'rejection' ? 'bg-destructive/20 text-destructive' :
                       'bg-primary/20 text-primary'
                     }`}>
-                      {notification.type === 'approval' ? <CheckCircle2 className="h-6 w-6" /> :
-                       notification.type === 'rejection' ? <AlertCircle className="h-6 w-6" /> :
-                       <Bell className="h-6 w-6" />}
+                      {notification.type === 'approval' ? <CheckCircle2 className="h-5 w-5" /> :
+                       notification.type === 'rejection' ? <AlertCircle className="h-5 w-5" /> :
+                       <Bell className="h-5 w-5" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-base mb-1">{notification.title}</p>
-                      <p className="text-sm text-foreground/80 mt-1 line-clamp-2">
+                      <p className="font-semibold text-sm">{notification.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2 font-medium">
+                      <p className="text-xs text-muted-foreground mt-2">
                         {new Date(notification.created_at).toLocaleString()}
                       </p>
                     </div>
@@ -666,12 +617,9 @@ const StudentDashboard = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="relative inline-block mb-4">
-                  <Bell className="h-16 w-16 text-muted-foreground/40" />
-                  <div className="absolute inset-0 blur-xl bg-muted-foreground/10 -z-10" />
-                </div>
-                <p className="text-muted-foreground text-lg">No notifications yet</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No notifications yet</p>
               </div>
             )}
           </CardContent>
