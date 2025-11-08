@@ -64,6 +64,10 @@ const UpdateSemester = () => {
   // Batch-specific settings
   const [batchSettings, setBatchSettings] = useState<Map<string, BatchSettings>>(new Map());
   const [editingBatch, setEditingBatch] = useState<string | null>(null);
+  const [batchSchedules, setBatchSchedules] = useState<Map<string, {
+    start: string;
+    end: string;
+  }>>(new Map());
 
   useEffect(() => {
     fetchBatches();
@@ -259,6 +263,129 @@ const UpdateSemester = () => {
     }
   };
 
+  const handleUpdateBatchSchedule = async (batchName: string, start: string, end: string) => {
+    try {
+      // Validation
+      if (start && end && new Date(start) >= new Date(end)) {
+        toast({
+          title: "Invalid Schedule",
+          description: "End time must be after start time",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const existing = batchSettings.get(batchName);
+      
+      if (existing) {
+        // Update
+        const { error } = await supabase
+          .from('batch_submission_settings')
+          .update({ 
+            scheduled_start: start || null,
+            scheduled_end: end || null,
+            updated_by: user?.id
+          })
+          .eq('batch_name', batchName);
+
+        if (error) throw error;
+      } else {
+        // Create
+        const { error } = await supabase
+          .from('batch_submission_settings')
+          .insert({ 
+            batch_name: batchName,
+            enabled: true,
+            scheduled_start: start || null,
+            scheduled_end: end || null,
+            updated_by: user?.id
+          });
+
+        if (error) throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: `Custom schedule set for ${batchName}`
+      });
+      
+      // Clear editing state
+      const newSchedules = new Map(batchSchedules);
+      newSchedules.delete(batchName);
+      setBatchSchedules(newSchedules);
+      setEditingBatch(null);
+      
+      fetchSubmissionSettings();
+    } catch (error) {
+      console.error('Error updating batch schedule:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update schedule",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleClearBatchSchedule = async (batchName: string) => {
+    try {
+      const { error } = await supabase
+        .from('batch_submission_settings')
+        .update({ 
+          scheduled_start: null,
+          scheduled_end: null,
+          updated_by: user?.id
+        })
+        .eq('batch_name', batchName);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: `Custom schedule cleared for ${batchName}. Using global settings.`
+      });
+      
+      fetchSubmissionSettings();
+    } catch (error) {
+      console.error('Error clearing batch schedule:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear schedule",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getBatchStatusMessage = (batchName: string): string => {
+    const settings = batchSettings.get(batchName);
+    
+    if (!settings) {
+      return `Using global settings (${globalEnabled ? 'enabled' : 'disabled'})`;
+    }
+    
+    const now = new Date();
+    
+    if (!settings.enabled) {
+      return "Submissions disabled for this batch";
+    }
+    
+    if (settings.scheduled_start) {
+      const start = new Date(settings.scheduled_start);
+      if (now < start) {
+        return `Opens on ${start.toLocaleString()}`;
+      }
+    }
+    
+    if (settings.scheduled_end) {
+      const end = new Date(settings.scheduled_end);
+      if (now > end) {
+        return "Schedule expired";
+      }
+      return `Closes on ${end.toLocaleString()}`;
+    }
+    
+    return "Custom settings active";
+  };
+
   const getStatusMessage = () => {
     const now = new Date();
     
@@ -284,12 +411,29 @@ const UpdateSemester = () => {
     return "✅ Submissions are currently open";
   };
 
-  const getBatchStatus = (batchName: string): "default" | "destructive" | "secondary" => {
+  const getBatchStatus = (batchName: string): "default" | "destructive" | "secondary" | "outline" => {
     const settings = batchSettings.get(batchName);
+    const now = new Date();
+    
     if (!settings) {
+      // No override, use global
       return globalEnabled ? "default" : "destructive";
     }
-    return settings.enabled ? "default" : "destructive";
+    
+    if (!settings.enabled) {
+      return "destructive";
+    }
+    
+    // Check schedule
+    if (settings.scheduled_start && now < new Date(settings.scheduled_start)) {
+      return "outline"; // Scheduled, not yet open
+    }
+    
+    if (settings.scheduled_end && now > new Date(settings.scheduled_end)) {
+      return "secondary"; // Expired
+    }
+    
+    return "default"; // Active
   };
 
   const getBatchEnabled = (batchName: string): boolean => {
@@ -721,90 +865,187 @@ const UpdateSemester = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {batches.map((batch) => (
-                    <Card key={batch.id} className="border">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-foreground">{batch.name}</h4>
-                            <Badge variant={getBatchStatus(batch.name)} className="text-xs">
-                              {getBatchEnabled(batch.name) ? 'Open' : 'Closed'}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{batch.student_count}</span>
-                            
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive"
-                                  onClick={() => {
-                                    setBatchToDelete(batch);
-                                    setDeleteConfirmed(false);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Batch {batch.name}?</AlertDialogTitle>
-                                  <AlertDialogDescription className="space-y-4">
-                                    <p className="text-destructive font-semibold">
-                                      ⚠️ This action cannot be undone!
-                                    </p>
-                                    <div className="bg-muted p-4 rounded-lg space-y-2">
-                                      <p className="font-medium">This will permanently delete:</p>
-                                      <ul className="list-disc list-inside space-y-1 text-sm">
-                                        <li>{batch.student_count} student(s) and their accounts</li>
-                                        <li>All applications from this batch</li>
-                                        <li>All related faculty assignments</li>
-                                      </ul>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        id="confirm-delete"
-                                        checked={deleteConfirmed}
-                                        onCheckedChange={(checked) => setDeleteConfirmed(checked as boolean)}
-                                      />
-                                      <label
-                                        htmlFor="confirm-delete"
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                      >
-                                        I understand this action cannot be undone
-                                      </label>
-                                    </div>
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel onClick={() => {
-                                    setBatchToDelete(null);
-                                    setDeleteConfirmed(false);
-                                  }}>
-                                    Cancel
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={handleDeleteBatch}
-                                    disabled={!deleteConfirmed || isDeleting}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  {batches.map((batch) => {
+                    const batchSchedule = batchSchedules.get(batch.name) || { start: '', end: '' };
+                    const existingSettings = batchSettings.get(batch.name);
+                    const isEditing = editingBatch === batch.name;
+                    
+                    return (
+                      <Card key={batch.id} className="border">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold text-foreground">{batch.name}</h4>
+                              <Badge variant={getBatchStatus(batch.name)} className="text-xs">
+                                {getBatchEnabled(batch.name) ? 'Open' : 'Closed'}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">{batch.student_count}</span>
+                              
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive"
+                                    onClick={() => {
+                                      setBatchToDelete(batch);
+                                      setDeleteConfirmed(false);
+                                    }}
                                   >
-                                    {isDeleting ? 'Deleting...' : 'Delete Batch'}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Batch {batch.name}?</AlertDialogTitle>
+                                    <AlertDialogDescription className="space-y-4">
+                                      <p className="text-destructive font-semibold">
+                                        ⚠️ This action cannot be undone!
+                                      </p>
+                                      <div className="bg-muted p-4 rounded-lg space-y-2">
+                                        <p className="font-medium">This will permanently delete:</p>
+                                        <ul className="list-disc list-inside space-y-1 text-sm">
+                                          <li>{batch.student_count} student(s) and their accounts</li>
+                                          <li>All applications from this batch</li>
+                                          <li>All related faculty assignments</li>
+                                        </ul>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id="confirm-delete"
+                                          checked={deleteConfirmed}
+                                          onCheckedChange={(checked) => setDeleteConfirmed(checked as boolean)}
+                                        />
+                                        <label
+                                          htmlFor="confirm-delete"
+                                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                          I understand this action cannot be undone
+                                        </label>
+                                      </div>
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel onClick={() => {
+                                      setBatchToDelete(null);
+                                      setDeleteConfirmed(false);
+                                    }}>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={handleDeleteBatch}
+                                      disabled={!deleteConfirmed || isDeleting}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      {isDeleting ? 'Deleting...' : 'Delete Batch'}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Current Semester</span>
-                          <span className="text-lg font-bold text-primary">{batch.current_semester}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+
+                          <Collapsible>
+                            <CollapsibleTrigger asChild>
+                              <Button variant="ghost" size="sm" className="w-full justify-start">
+                                <Settings2 className="mr-2 h-4 w-4" />
+                                Submission Settings
+                              </Button>
+                            </CollapsibleTrigger>
+                            
+                            <CollapsibleContent className="space-y-4 mt-3 p-3 bg-muted/30 rounded-md">
+                              {/* Enable/Disable Toggle */}
+                              <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                  <Label className="text-sm font-medium">Enable submissions</Label>
+                                  <p className="text-xs text-muted-foreground">Overrides global setting</p>
+                                </div>
+                                <Switch
+                                  checked={getBatchEnabled(batch.name)}
+                                  onCheckedChange={(enabled) => handleToggleBatch(batch.name, enabled)}
+                                />
+                              </div>
+
+                              {/* Custom Schedule */}
+                              <div className="space-y-3 pt-3 border-t">
+                                <Label className="text-sm font-medium">Custom Schedule (Optional)</Label>
+                                <div className="space-y-2">
+                                  <div className="space-y-1">
+                                    <Label className="text-xs text-muted-foreground">Opens At</Label>
+                                    <Input
+                                      type="datetime-local"
+                                      value={isEditing ? batchSchedule.start : (existingSettings?.scheduled_start || '')}
+                                      onChange={(e) => {
+                                        if (!isEditing) setEditingBatch(batch.name);
+                                        const newSchedules = new Map(batchSchedules);
+                                        newSchedules.set(batch.name, { 
+                                          ...batchSchedule, 
+                                          start: e.target.value 
+                                        });
+                                        setBatchSchedules(newSchedules);
+                                      }}
+                                      className="h-9"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs text-muted-foreground">Closes At</Label>
+                                    <Input
+                                      type="datetime-local"
+                                      value={isEditing ? batchSchedule.end : (existingSettings?.scheduled_end || '')}
+                                      onChange={(e) => {
+                                        if (!isEditing) setEditingBatch(batch.name);
+                                        const newSchedules = new Map(batchSchedules);
+                                        newSchedules.set(batch.name, { 
+                                          ...batchSchedule, 
+                                          end: e.target.value 
+                                        });
+                                        setBatchSchedules(newSchedules);
+                                      }}
+                                      className="h-9"
+                                    />
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => handleUpdateBatchSchedule(batch.name, batchSchedule.start, batchSchedule.end)}
+                                      disabled={!isEditing && !batchSchedule.start && !batchSchedule.end}
+                                    >
+                                      Save Schedule
+                                    </Button>
+                                    {existingSettings?.scheduled_start || existingSettings?.scheduled_end ? (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => handleClearBatchSchedule(batch.name)}
+                                      >
+                                        Clear
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Status Message */}
+                              <Alert>
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription className="text-xs">
+                                  {getBatchStatusMessage(batch.name)}
+                                </AlertDescription>
+                              </Alert>
+                            </CollapsibleContent>
+                          </Collapsible>
+                          
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <span className="text-sm text-muted-foreground">Current Semester</span>
+                            <span className="text-lg font-bold text-primary">{batch.current_semester}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
