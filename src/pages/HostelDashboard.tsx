@@ -171,8 +171,8 @@ export default function HostelDashboard() {
     rejected: hostelStudents.filter(a => a.status === 'rejected' && !a.hostel_verified).length
   };
 
-  const departments = Array.from(new Set(applications.map(a => a.department))).filter(Boolean);
-  const semesters = Array.from(new Set(applications.map(a => a.semester))).filter(Boolean).sort();
+  const departments = ['MECH', 'CSE', 'CIVIL', 'EC', 'AIML', 'CD'];
+  const semesters = [1, 2, 3, 4, 5, 6, 7, 8];
 
   return (
     <div className="min-h-screen bg-background">
