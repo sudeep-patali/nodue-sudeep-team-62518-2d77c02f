@@ -12,7 +12,10 @@ import {
   FileCheck,
   AlertCircle,
   Clock,
-  Loader2
+  Loader2,
+  UserCircle,
+  UserPlus,
+  CalendarClock
 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { supabase } from "@/lib/supabase";
@@ -151,7 +154,7 @@ const AdminDashboard = () => {
     {
       title: "My Profile",
       description: "View and edit your staff profile information",
-      icon: Users,
+      icon: UserCircle,
       href: "/admin/profile",
       color: "bg-accent"
     },
@@ -172,7 +175,7 @@ const AdminDashboard = () => {
     {
       title: "Add Staff",
       description: "Create staff accounts for library, hostel, office & lab",
-      icon: Users,
+      icon: UserPlus,
       href: "/admin/add-staff",
       color: "bg-secondary"
     },
@@ -193,7 +196,7 @@ const AdminDashboard = () => {
     {
       title: "Update Semester",
       description: "Bulk update semester for entire batch of students",
-      icon: Settings,
+      icon: CalendarClock,
       href: "/admin/update-semester",
       color: "bg-accent"
     },
