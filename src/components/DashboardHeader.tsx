@@ -11,9 +11,10 @@ import { useState } from "react";
 interface DashboardHeaderProps {
   user: any;
   title: string;
+  showNotifications?: boolean;
 }
 
-const DashboardHeader = ({ user, title }: DashboardHeaderProps) => {
+const DashboardHeader = ({ user, title, showNotifications = true }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { unreadCount } = useNotifications();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -40,24 +41,26 @@ const DashboardHeader = ({ user, title }: DashboardHeaderProps) => {
           </div>
           
           <div className="flex items-center gap-4">
-            <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  {unreadCount > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                    >
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </Badge>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-auto p-0">
-                <NotificationsPanel onClose={() => setNotificationsOpen(false)} />
-              </PopoverContent>
-            </Popover>
+            {showNotifications && (
+              <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      >
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-auto p-0">
+                  <NotificationsPanel onClose={() => setNotificationsOpen(false)} />
+                </PopoverContent>
+              </Popover>
+            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
