@@ -156,56 +156,64 @@ const AdminDashboard = () => {
       description: "View and edit your staff profile information",
       icon: UserCircle,
       href: "/admin/profile",
-      color: "bg-accent"
+      bgColor: "bg-blue-100 dark:bg-blue-950",
+      iconColor: "text-blue-600 dark:text-blue-400"
     },
     {
       title: "Add Students",
       description: "Create student accounts with login credentials",
       icon: Users,
       href: "/admin/add-student",
-      color: "bg-primary"
+      bgColor: "bg-purple-100 dark:bg-purple-950",
+      iconColor: "text-purple-600 dark:text-purple-400"
     },
     {
       title: "Add Faculty", 
       description: "Create faculty accounts with login credentials",
       icon: Users,
       href: "/admin/add-faculty",
-      color: "bg-success"
+      bgColor: "bg-green-100 dark:bg-green-950",
+      iconColor: "text-green-600 dark:text-green-400"
     },
     {
       title: "Add Staff",
       description: "Create staff accounts for library, hostel, office & lab",
       icon: UserPlus,
       href: "/admin/add-staff",
-      color: "bg-secondary"
+      bgColor: "bg-orange-100 dark:bg-orange-950",
+      iconColor: "text-orange-600 dark:text-orange-400"
     },
     {
       title: "Subject Management",
       description: "Configure subjects, semesters, and electives",
       icon: BookOpen,
       href: "/admin/subjects",
-      color: "bg-warning"
+      bgColor: "bg-amber-100 dark:bg-amber-950",
+      iconColor: "text-amber-600 dark:text-amber-400"
     },
     {
       title: "Application Tracker",
       description: "Monitor all no-due applications and their status", 
       icon: ClipboardList,
       href: "/admin/tracker",
-      color: "bg-destructive"
+      bgColor: "bg-red-100 dark:bg-red-950",
+      iconColor: "text-red-600 dark:text-red-400"
     },
     {
       title: "Update Semester",
       description: "Bulk update semester for entire batch of students",
       icon: CalendarClock,
       href: "/admin/update-semester",
-      color: "bg-accent"
+      bgColor: "bg-indigo-100 dark:bg-indigo-950",
+      iconColor: "text-indigo-600 dark:text-indigo-400"
     },
     {
       title: "Control Panel",
       description: "Manage faculty, students, and staff accounts",
       icon: Settings,
       href: "/admin/control-panel",
-      color: "bg-primary"
+      bgColor: "bg-cyan-100 dark:bg-cyan-950",
+      iconColor: "text-cyan-600 dark:text-cyan-400"
     }
   ];
 
@@ -261,8 +269,8 @@ const AdminDashboard = () => {
           {quickActions.map((action, index) => (
             <Card key={index} className="shadow-md hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
-                <div className={`h-12 w-12 rounded-lg ${action.color} flex items-center justify-center mb-4`}>
-                  <action.icon className="h-6 w-6 text-white" />
+                <div className={`h-12 w-12 rounded-lg ${action.bgColor} flex items-center justify-center mb-4`}>
+                  <action.icon className={`h-6 w-6 ${action.iconColor}`} />
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">{action.title}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{action.description}</p>
