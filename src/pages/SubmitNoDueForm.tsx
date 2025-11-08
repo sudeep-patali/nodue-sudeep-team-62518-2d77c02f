@@ -55,6 +55,7 @@ const SubmitNoDueForm = () => {
   const [facultyList, setFacultyList] = useState<Faculty[]>([]);
   const [selectedElectives, setSelectedElectives] = useState<string[]>([]);
   const [subjectFacultyMap, setSubjectFacultyMap] = useState<Record<string, string>>({});
+  const [existingApplication, setExistingApplication] = useState<any>(null);
 
   useEffect(() => {
     if (!user) {
@@ -90,9 +91,33 @@ const SubmitNoDueForm = () => {
       setSection(data.section);
       setSemester(data.semester);
       setStudentType(data.student_type);
+
+      // Check for existing application
+      await checkExistingApplication(data.semester, data.batch);
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
+    }
+  };
+
+  const checkExistingApplication = async (semester: number, batch: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('id, status, created_at')
+        .eq('student_id', user?.id)
+        .eq('semester', semester)
+        .eq('batch', batch)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking existing application:', error);
+        return;
+      }
+
+      setExistingApplication(data);
+    } catch (error) {
+      console.error('Error checking existing application:', error);
     }
   };
 
@@ -278,6 +303,75 @@ const SubmitNoDueForm = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show warning if application already exists
+  if (existingApplication) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10">
+        <DashboardHeader 
+          title="Submit No-Due Application"
+          user={{
+            name: profile.name,
+            email: profile.email,
+            role: 'student'
+          }}
+        />
+
+        <div className="container mx-auto p-6 max-w-4xl">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/dashboard/student')}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Application Already Exists</CardTitle>
+              <CardDescription>
+                You have already submitted an application for Semester {semester}, Batch {profile.batch}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 border rounded-lg bg-muted">
+                <p className="text-sm text-muted-foreground mb-2">Current Application Status</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant={existingApplication.status === 'approved' ? 'default' : 'secondary'}>
+                    {existingApplication.status}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    Submitted on {new Date(existingApplication.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                You can only have one active application per semester and batch. 
+                To submit a new application, you need to delete your existing one first.
+              </p>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate('/dashboard/student')}
+                  variant="default"
+                >
+                  View Dashboard
+                </Button>
+                <Button
+                  onClick={() => navigate('/application-tracker')}
+                  variant="outline"
+                >
+                  Track Application
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
