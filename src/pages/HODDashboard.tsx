@@ -203,6 +203,17 @@ export default function HODDashboard() {
         .filter((a: any) => a.faculty_id === user?.id)
         .map((a: any) => a.id);
       
+      console.log('Teaching Mode Debug:', {
+        userId: user?.id,
+        allAssignments: selectedApp.faculty_assignments,
+        assignmentsToUpdate,
+        approved
+      });
+      
+      if (assignmentsToUpdate.length === 0) {
+        throw new Error('No assignments found for current user');
+      }
+      
       const { error: updateError } = await supabase
         .from('application_subject_faculty')
         .update({
