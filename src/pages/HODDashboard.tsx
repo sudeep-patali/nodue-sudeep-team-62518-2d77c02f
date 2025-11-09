@@ -773,15 +773,23 @@ export default function HODDashboard() {
                         <span>Hostel: {selectedApp.hostel_verified ? 'Verified' : 'Pending'}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <span>College Office: {selectedApp.college_office_verified ? 'Verified' : 'Pending'}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <span>Faculty: Verified</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>College Office: {selectedApp.college_office_verified ? 'Verified' : 'Pending'}</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>Faculty: Verified</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>Counsellor: {selectedApp.counsellor_verified ? 'Verified' : 'Pending'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>Class Advisor: Verified</span>
+                  </div>
+                </div>
                   {selectedApp.hod_comment && activeTab === 'rejected' && (
                     <div className="mt-3 p-2 bg-destructive/10 rounded border border-destructive/20">
                       <p className="text-xs font-medium text-destructive">Previous Rejection Reason:</p>

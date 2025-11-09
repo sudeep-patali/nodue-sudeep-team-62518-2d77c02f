@@ -13,6 +13,10 @@ interface Application {
   college_office_comment?: string;
   faculty_verified: boolean;
   faculty_comment?: string;
+  counsellor_verified: boolean;
+  counsellor_comment?: string;
+  class_advisor_verified: boolean;
+  class_advisor_comment?: string;
   hod_verified: boolean;
   hod_comment?: string;
   payment_verified: boolean;
@@ -166,6 +170,18 @@ export const NoDueCertificate = ({ application, profile }: NoDueCertificateProps
               name="Faculty Clearance"
               date={formatDate(application.updated_at)}
               comment={application.faculty_comment}
+            />
+            
+            <ClearanceItem 
+              name="Counsellor Clearance"
+              date={formatDate(application.updated_at)}
+              comment={application.counsellor_comment}
+            />
+            
+            <ClearanceItem 
+              name="Class Advisor Clearance"
+              date={formatDate(application.updated_at)}
+              comment={application.class_advisor_comment}
             />
             
             <ClearanceItem 

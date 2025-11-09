@@ -112,6 +112,8 @@ export default function ApplicationDetailModal({
               <VerificationStatusBadge verified={application.hostel_verified} label="Hostel" />
               <VerificationStatusBadge verified={application.lab_verified} label="Lab" />
               <VerificationStatusBadge verified={application.faculty_verified} label="Faculty" />
+              <VerificationStatusBadge verified={application.counsellor_verified} label="Counsellor" />
+              <VerificationStatusBadge verified={application.class_advisor_verified} label="Class Advisor" />
               <VerificationStatusBadge verified={application.hod_verified} label="HOD" />
             </div>
           </div>

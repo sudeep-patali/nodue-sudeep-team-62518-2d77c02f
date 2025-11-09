@@ -10,6 +10,10 @@ interface Application {
   college_office_comment?: string;
   faculty_verified: boolean;
   faculty_comment?: string;
+  counsellor_verified: boolean;
+  counsellor_comment?: string;
+  class_advisor_verified: boolean;
+  class_advisor_comment?: string;
   hod_verified: boolean;
   hod_comment?: string;
   payment_verified: boolean;
@@ -326,6 +330,30 @@ export const generateCertificateHTML = (application: Application, profile: Profi
             <div class="clearance-details">
               <div class="clearance-date">Verified on: ${formatDate(application.updated_at)}</div>
               <div class="clearance-remarks">Remarks: ${application.faculty_comment || 'No remarks'}</div>
+            </div>
+          </div>
+          
+          <!-- Counsellor Clearance -->
+          <div class="clearance-item">
+            <div class="clearance-header">
+              <span class="checkmark">✓</span>
+              <span class="clearance-name">Counsellor Clearance</span>
+            </div>
+            <div class="clearance-details">
+              <div class="clearance-date">Verified on: ${formatDate(application.updated_at)}</div>
+              <div class="clearance-remarks">Remarks: ${application.counsellor_comment || 'No remarks'}</div>
+            </div>
+          </div>
+          
+          <!-- Class Advisor Clearance -->
+          <div class="clearance-item">
+            <div class="clearance-header">
+              <span class="checkmark">✓</span>
+              <span class="clearance-name">Class Advisor Clearance</span>
+            </div>
+            <div class="clearance-details">
+              <div class="clearance-date">Verified on: ${formatDate(application.updated_at)}</div>
+              <div class="clearance-remarks">Remarks: ${application.class_advisor_comment || 'No remarks'}</div>
             </div>
           </div>
           

@@ -43,6 +43,16 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
       variant: 'bg-success/10 text-success border-success/20',
       icon: <CheckCircle2 className="h-3 w-3" />
     },
+    counsellor_verified: {
+      label: 'Counsellor Verified',
+      variant: 'bg-success/10 text-success border-success/20',
+      icon: <CheckCircle2 className="h-3 w-3" />
+    },
+    class_advisor_verified: {
+      label: 'Class Advisor Verified',
+      variant: 'bg-success/10 text-success border-success/20',
+      icon: <CheckCircle2 className="h-3 w-3" />
+    },
     hod_verified: {
       label: 'HOD Verified',
       variant: 'bg-success/10 text-success border-success/20',

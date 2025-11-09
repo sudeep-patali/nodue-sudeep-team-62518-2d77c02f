@@ -131,6 +131,36 @@ export default function ApplicationDetailModal({
                   College Office Verification
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                {application.faculty_verified ? (
+                  <CheckCircle className="h-4 w-4 text-success" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className={application.faculty_verified ? "text-success" : "text-muted-foreground"}>
+                  Faculty Verification
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {application.counsellor_verified ? (
+                  <CheckCircle className="h-4 w-4 text-success" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className={application.counsellor_verified ? "text-success" : "text-muted-foreground"}>
+                  Counsellor Verification
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {application.class_advisor_verified ? (
+                  <CheckCircle className="h-4 w-4 text-success" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className={application.class_advisor_verified ? "text-success" : "text-muted-foreground"}>
+                  Class Advisor Verification
+                </span>
+              </div>
             </div>
           </div>
 
