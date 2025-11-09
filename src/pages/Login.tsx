@@ -23,7 +23,9 @@ const Login = () => {
     college_office: 'College Office',
     faculty: 'Faculty',
     hod: 'HOD',
-    lab_instructor: 'Lab Instructor'
+    lab_instructor: 'Lab Instructor',
+    counsellor: 'Student Counsellor',
+    class_advisor: 'Class Advisor'
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -173,14 +175,14 @@ const Login = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">
-                  {['library', 'hostel', 'college_office', 'lab_instructor', 'faculty', 'hod'].includes(role || '')
+                  {['library', 'hostel', 'college_office', 'lab_instructor', 'faculty', 'hod', 'counsellor', 'class_advisor'].includes(role || '')
                     ? 'Password (Employee ID)'
                     : 'Password'}
                 </Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder={['library', 'hostel', 'college_office', 'lab_instructor', 'faculty', 'hod'].includes(role || '')
+                  placeholder={['library', 'hostel', 'college_office', 'lab_instructor', 'faculty', 'hod', 'counsellor', 'class_advisor'].includes(role || '')
                     ? 'Enter your employee ID'
                     : 'Enter your password'}
                   value={password}
