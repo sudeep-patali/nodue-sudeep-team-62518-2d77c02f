@@ -159,7 +159,7 @@ export default function HODDashboard() {
             *,
             profiles:student_id (name, usn, email, department, student_type)
           `)
-          .eq('faculty_verified', true)
+          .eq('class_advisor_verified', true)
           .order('created_at', { ascending: false });
 
         const { data, error } = await query;

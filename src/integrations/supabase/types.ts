@@ -91,8 +91,14 @@ export type Database = {
       applications: {
         Row: {
           batch: string
+          class_advisor_comment: string | null
+          class_advisor_verified: boolean | null
+          class_advisor_verified_at: string | null
           college_office_comment: string | null
           college_office_verified: boolean | null
+          counsellor_comment: string | null
+          counsellor_verified: boolean | null
+          counsellor_verified_at: string | null
           created_at: string | null
           department: Database["public"]["Enums"]["department"]
           faculty_comment: string | null
@@ -116,8 +122,14 @@ export type Database = {
         }
         Insert: {
           batch: string
+          class_advisor_comment?: string | null
+          class_advisor_verified?: boolean | null
+          class_advisor_verified_at?: string | null
           college_office_comment?: string | null
           college_office_verified?: boolean | null
+          counsellor_comment?: string | null
+          counsellor_verified?: boolean | null
+          counsellor_verified_at?: string | null
           created_at?: string | null
           department: Database["public"]["Enums"]["department"]
           faculty_comment?: string | null
@@ -141,8 +153,14 @@ export type Database = {
         }
         Update: {
           batch?: string
+          class_advisor_comment?: string | null
+          class_advisor_verified?: boolean | null
+          class_advisor_verified_at?: string | null
           college_office_comment?: string | null
           college_office_verified?: boolean | null
+          counsellor_comment?: string | null
+          counsellor_verified?: boolean | null
+          counsellor_verified_at?: string | null
           created_at?: string | null
           department?: Database["public"]["Enums"]["department"]
           faculty_comment?: string | null

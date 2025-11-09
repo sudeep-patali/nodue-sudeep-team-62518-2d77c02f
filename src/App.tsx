@@ -34,6 +34,8 @@ import LibraryDashboard from "./pages/LibraryDashboard";
 import HostelDashboard from "./pages/HostelDashboard";
 import CollegeOfficeDashboard from "./pages/CollegeOfficeDashboard";
 import LabInstructorDashboard from "./pages/LabInstructorDashboard";
+import CounsellorDashboard from "./pages/CounsellorDashboard";
+import ClassAdvisorDashboard from "./pages/ClassAdvisorDashboard";
 import LabInstructorProfile from "./pages/LabInstructorProfile";
 import EditLabInstructorProfile from "./pages/EditLabInstructorProfile";
 import HostelProfile from "./pages/HostelProfile";
@@ -354,6 +356,40 @@ const App = () => (
               path="/hod/notifications" 
               element={
                 <ProtectedRoute requiredRole="hod">
+                  <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Counsellor Dashboard */}
+            <Route 
+              path="/dashboard/counsellor" 
+              element={
+                <ProtectedRoute requiredRole="counsellor">
+                  <CounsellorDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/counsellor/notifications" 
+              element={
+                <ProtectedRoute requiredRole="counsellor">
+                  <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Class Advisor Dashboard */}
+            <Route 
+              path="/dashboard/class_advisor" 
+              element={
+                <ProtectedRoute requiredRole="class_advisor">
+                  <ClassAdvisorDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/class-advisor/notifications" 
+              element={
+                <ProtectedRoute requiredRole="class_advisor">
                   <Notifications />
                 </ProtectedRoute>
               } 

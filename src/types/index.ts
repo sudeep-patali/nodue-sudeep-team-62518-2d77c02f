@@ -6,7 +6,9 @@ export type UserRole =
   | 'college_office' 
   | 'faculty' 
   | 'hod' 
-  | 'lab_instructor';
+  | 'lab_instructor'
+  | 'counsellor'
+  | 'class_advisor';
 
 export type Department = 'MECH' | 'CSE' | 'CIVIL' | 'EC' | 'AIML' | 'CD';
 export type Section = 'A' | 'B';
@@ -19,6 +21,8 @@ export type ApplicationStatus =
   | 'hostel_verified'
   | 'college_office_verified'
   | 'faculty_verified'
+  | 'counsellor_verified'
+  | 'class_advisor_verified'
   | 'hod_verified'
   | 'payment_pending'
   | 'lab_verified'
@@ -64,6 +68,10 @@ export interface Application {
   collegeOfficeComment?: string;
   hodVerified: boolean;
   hodComment?: string;
+  counsellorVerified: boolean;
+  counsellorComment?: string;
+  classAdvisorVerified: boolean;
+  classAdvisorComment?: string;
   paymentVerified: boolean;
   paymentComment?: string;
   labVerified: boolean;
