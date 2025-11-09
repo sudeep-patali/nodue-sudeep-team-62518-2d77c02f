@@ -57,10 +57,14 @@ const Notifications = () => {
     
     // Match notifications to roles based on title and message content
     if (currentRole === 'counsellor') {
-      return title.includes('counsellor') || message.includes('counsellor');
+      // Only show actionable counsellor notifications (ready for verification)
+      return title.includes('ready for counsellor verification') || 
+             title === 'application ready for counsellor verification';
     }
     if (currentRole === 'class_advisor') {
-      return title.includes('class advisor') || message.includes('class advisor');
+      // Only show actionable class advisor notifications
+      return title.includes('ready for class advisor verification') ||
+             title === 'application ready for class advisor verification';
     }
     if (currentRole === 'faculty') {
       return title.includes('faculty') && !title.includes('counsellor') && !title.includes('class advisor');
