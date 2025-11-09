@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -359,6 +359,14 @@ serve(async (req) => {
       .select('name, usn, department')
       .eq('id', user.id)
       .single();
+
+    if (!studentProfile) {
+      console.error('Student profile not found');
+      return new Response(
+        JSON.stringify({ error: 'Student profile not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Send notification to library staff (use admin client to bypass RLS)
     const { data: libraryStaff } = await supabaseAdmin.rpc('get_users_by_role', {
