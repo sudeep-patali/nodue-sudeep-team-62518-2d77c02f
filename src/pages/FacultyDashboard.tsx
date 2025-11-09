@@ -166,6 +166,7 @@ export default function FacultyDashboard() {
         .from('application_subject_faculty')
         .update({
           faculty_verified: approved,
+          verification_status: approved ? 'approved' : 'rejected',
           faculty_comment: comment || null,
           verified_at: approved ? new Date().toISOString() : null,
           updated_at: new Date().toISOString()
