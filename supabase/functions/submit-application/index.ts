@@ -201,6 +201,20 @@ serve(async (req) => {
       );
     }
 
+    // Verify counsellor also has faculty role
+    const { data: counsellorIsFaculty, error: counsellorFacultyError } = await supabaseAdmin
+      .rpc('has_role', { 
+        _user_id: submission.counsellor_id, 
+        _role: 'faculty' 
+      });
+
+    if (counsellorFacultyError || !counsellorIsFaculty) {
+      return new Response(
+        JSON.stringify({ error: 'Counsellor must be a faculty member' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Verify class advisor exists, is active, and has class_advisor role
     const { data: classAdvisor, error: advisorError } = await supabaseAdmin
       .from('staff_profiles')
@@ -226,6 +240,20 @@ serve(async (req) => {
     if (advisorRoleError || !hasAdvisorRole) {
       return new Response(
         JSON.stringify({ error: 'Selected user does not have class advisor role' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify class advisor also has faculty role
+    const { data: advisorIsFaculty, error: advisorFacultyError } = await supabaseAdmin
+      .rpc('has_role', { 
+        _user_id: submission.class_advisor_id, 
+        _role: 'faculty' 
+      });
+
+    if (advisorFacultyError || !advisorIsFaculty) {
+      return new Response(
+        JSON.stringify({ error: 'Class advisor must be a faculty member' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

@@ -171,7 +171,6 @@ const SubmitNoDueForm = () => {
 
   const fetchCounsellors = async () => {
     try {
-      // Fetch all active staff
       const { data: staffData, error: staffError } = await supabase
         .from('staff_profiles')
         .select('id, name, designation, department, is_active')
@@ -181,17 +180,31 @@ const SubmitNoDueForm = () => {
 
       const staffIds = staffData?.map(s => s.id) || [];
       
-      // Filter by counsellor role
-      const { data: counsellorRoles, error: roleError } = await supabase
+      // Get staff who have BOTH faculty role AND counsellor role
+      const { data: facultyRoles, error: facultyError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'faculty')
+        .in('user_id', staffIds);
+
+      if (facultyError) throw facultyError;
+
+      const facultyIds = new Set(facultyRoles?.map(r => r.user_id) || []);
+
+      const { data: counsellorRoles, error: counsellorError } = await supabase
         .from('user_roles')
         .select('user_id')
         .eq('role', 'counsellor')
         .in('user_id', staffIds);
 
-      if (roleError) throw roleError;
+      if (counsellorError) throw counsellorError;
 
       const counsellorIds = new Set(counsellorRoles?.map(r => r.user_id) || []);
-      const counsellors = staffData?.filter(s => counsellorIds.has(s.id)) || [];
+      
+      // Filter for staff who have both faculty and counsellor roles
+      const counsellors = staffData?.filter(s => 
+        facultyIds.has(s.id) && counsellorIds.has(s.id)
+      ) || [];
       
       setCounsellorList(counsellors);
     } catch (error: any) {
@@ -211,16 +224,31 @@ const SubmitNoDueForm = () => {
 
       const staffIds = staffData?.map(s => s.id) || [];
       
-      const { data: advisorRoles, error: roleError } = await supabase
+      // Get staff who have BOTH faculty role AND class_advisor role
+      const { data: facultyRoles, error: facultyError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'faculty')
+        .in('user_id', staffIds);
+
+      if (facultyError) throw facultyError;
+
+      const facultyIds = new Set(facultyRoles?.map(r => r.user_id) || []);
+
+      const { data: advisorRoles, error: advisorError } = await supabase
         .from('user_roles')
         .select('user_id')
         .eq('role', 'class_advisor')
         .in('user_id', staffIds);
 
-      if (roleError) throw roleError;
+      if (advisorError) throw advisorError;
 
       const advisorIds = new Set(advisorRoles?.map(r => r.user_id) || []);
-      const advisors = staffData?.filter(s => advisorIds.has(s.id)) || [];
+      
+      // Filter for staff who have both faculty and class_advisor roles
+      const advisors = staffData?.filter(s => 
+        facultyIds.has(s.id) && advisorIds.has(s.id)
+      ) || [];
       
       setClassAdvisorList(advisors);
     } catch (error: any) {
