@@ -9,7 +9,9 @@ import {
   Building2, 
   Users, 
   UserCog, 
-  FlaskConical 
+  FlaskConical,
+  UserRound,
+  UserCheck
 } from "lucide-react";
 
 const Index = () => {
@@ -71,6 +73,20 @@ const Index = () => {
       icon: FlaskConical, 
       description: 'Verify lab charge payment',
       color: 'bg-teal-600'
+    },
+    { 
+      id: 'counsellor', 
+      title: 'Student Counsellor', 
+      icon: UserRound, 
+      description: 'Provide student guidance and support',
+      color: 'bg-pink-600'
+    },
+    { 
+      id: 'class_advisor', 
+      title: 'Class Advisor', 
+      icon: UserCheck, 
+      description: 'Supervise and mentor class activities',
+      color: 'bg-amber-600'
     },
   ];
 
