@@ -377,6 +377,22 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/counsellor/profile" 
+              element={
+                <ProtectedRoute requiredRole="counsellor">
+                  <StaffProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/counsellor/profile/edit" 
+              element={
+                <ProtectedRoute requiredRole="counsellor">
+                  <EditStaffProfile />
+                </ProtectedRoute>
+              } 
+            />
             {/* Class Advisor Dashboard */}
             <Route 
               path="/dashboard/class_advisor" 
@@ -391,6 +407,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="class_advisor">
                   <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/class-advisor/profile" 
+              element={
+                <ProtectedRoute requiredRole="class_advisor">
+                  <StaffProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/class-advisor/profile/edit" 
+              element={
+                <ProtectedRoute requiredRole="class_advisor">
+                  <EditStaffProfile />
                 </ProtectedRoute>
               } 
             />

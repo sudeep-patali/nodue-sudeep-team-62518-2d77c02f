@@ -116,7 +116,12 @@ const StaffProfile = () => {
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold">My Profile</h1>
-          <Button onClick={() => navigate('/staff/edit-profile')}>
+          <Button onClick={() => {
+            const rolePrefix = userRoles[0] === 'counsellor' ? '/counsellor' 
+              : userRoles[0] === 'class_advisor' ? '/class-advisor' 
+              : '/staff';
+            navigate(`${rolePrefix}/profile/edit`);
+          }}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>

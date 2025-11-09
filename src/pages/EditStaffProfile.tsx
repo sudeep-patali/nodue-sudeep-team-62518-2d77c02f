@@ -93,7 +93,10 @@ const EditStaffProfile = () => {
 
       toast.success('Profile updated successfully!');
       await refreshProfile();
-      navigate('/staff/profile');
+      const rolePrefix = userRoles[0] === 'counsellor' ? '/counsellor' 
+        : userRoles[0] === 'class_advisor' ? '/class-advisor' 
+        : '/staff';
+      navigate(`${rolePrefix}/profile`);
     } catch (error: any) {
       toast.error(error.message || 'Failed to update profile');
     } finally {
@@ -116,7 +119,12 @@ const EditStaffProfile = () => {
         <Button
           variant="ghost"
           className="mb-4"
-          onClick={() => navigate('/staff/profile')}
+          onClick={() => {
+            const rolePrefix = userRoles[0] === 'counsellor' ? '/counsellor' 
+              : userRoles[0] === 'class_advisor' ? '/class-advisor' 
+              : '/staff';
+            navigate(`${rolePrefix}/profile`);
+          }}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Profile
@@ -225,7 +233,12 @@ const EditStaffProfile = () => {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => navigate('/staff/profile')}
+                  onClick={() => {
+                    const rolePrefix = userRoles[0] === 'counsellor' ? '/counsellor' 
+                      : userRoles[0] === 'class_advisor' ? '/class-advisor' 
+                      : '/staff';
+                    navigate(`${rolePrefix}/profile`);
+                  }}
                   disabled={isLoading}
                 >
                   Cancel
