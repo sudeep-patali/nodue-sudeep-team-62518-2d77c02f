@@ -216,30 +216,28 @@ export default function FacultyDashboard() {
             related_entity_id: applicationId
           });
 
-        // Notify HOD when all faculty have verified
+        // Notify assigned counsellor when all faculty have verified
         if (approved && allVerified) {
-          const { data: hodStaff } = await supabase
-            .from('staff_profiles')
-            .select('id')
-            .eq('department', selectedApp.department)
-            .eq('designation', 'HOD')
-            .eq('is_active', true)
+          const { data: appData } = await supabase
+            .from('applications')
+            .select('counsellor_id')
+            .eq('id', applicationId)
             .single();
 
-          if (hodStaff) {
+          if (appData?.counsellor_id) {
             const { error: notificationError } = await supabase
               .from('notifications')
               .insert({
-                user_id: hodStaff.id,
-                title: 'Application Ready for HOD Verification',
-                message: `${selectedApp.profiles.name} (${selectedApp.profiles.usn}) from ${selectedApp.department} - Semester ${selectedApp.profiles.semester} has been verified by all faculty members and is ready for HOD verification.`,
+                user_id: appData.counsellor_id,
+                title: 'Application Ready for Counsellor Verification',
+                message: `${selectedApp.profiles.name} (${selectedApp.profiles.usn}) from ${selectedApp.department} - Semester ${selectedApp.profiles.semester} has been verified by all faculty members and is ready for your counsellor verification.`,
                 type: 'info' as const,
                 related_entity_type: 'application',
                 related_entity_id: applicationId
               });
 
             if (notificationError) {
-              console.error('Failed to notify HOD:', notificationError);
+              console.error('Failed to notify counsellor:', notificationError);
             }
           }
         }

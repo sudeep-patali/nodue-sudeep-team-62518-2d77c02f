@@ -59,7 +59,19 @@ export default function ApplicationDetailModal({
 
       if (error) throw error;
 
-      toast.success("Application approved! Sent to Class Advisor for review.");
+      // Notify assigned class advisor
+      if (application.class_advisor_id) {
+        await supabase.from('notifications').insert({
+          user_id: application.class_advisor_id,
+          title: 'Application Ready for Class Advisor Verification',
+          message: `${student.name} (${student.usn}) from ${student.department} has been verified by the counsellor and is ready for your class advisor verification.`,
+          type: 'info',
+          related_entity_type: 'application',
+          related_entity_id: application.id
+        });
+      }
+
+      toast.success("Application approved! Class Advisor has been notified.");
       onUpdate();
       onClose();
     } catch (error) {

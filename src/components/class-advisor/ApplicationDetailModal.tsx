@@ -59,7 +59,27 @@ export default function ApplicationDetailModal({
 
       if (error) throw error;
 
-      toast.success("Application approved! Sent to HOD for final departmental verification.");
+      // Notify HOD of the student's department
+      const { data: hodStaff } = await supabase
+        .from('staff_profiles')
+        .select('id')
+        .eq('department', student.department)
+        .eq('designation', 'HOD')
+        .eq('is_active', true)
+        .single();
+
+      if (hodStaff) {
+        await supabase.from('notifications').insert({
+          user_id: hodStaff.id,
+          title: 'Application Ready for HOD Verification',
+          message: `${student.name} (${student.usn}) from ${student.department} - Semester ${student.semester} has been verified by all faculty, counsellor, and class advisor. Ready for final HOD verification.`,
+          type: 'info',
+          related_entity_type: 'application',
+          related_entity_id: application.id
+        });
+      }
+
+      toast.success("Application approved! HOD has been notified.");
       onUpdate();
       onClose();
     } catch (error) {
