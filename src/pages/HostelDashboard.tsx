@@ -66,21 +66,22 @@ export default function HostelDashboard() {
   };
 
   const fetchApplications = async () => {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('applications')
       .select(`
         *,
         profiles:student_id (name, usn, email, student_type, photo, section, department)
       `)
-      .eq('profiles.student_type', 'hostel')
-      .in('status', ['hostel_verification_pending', 'hostel_verified', 'rejected'])
       .eq('library_verified', true)
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching applications:', error);
+      setApplications([]);
     } else {
-      setApplications(data || []);
+      // Filter for hostel students only
+      const hostelApps = (data || []).filter(app => app.profiles?.student_type === 'hostel');
+      setApplications(hostelApps);
     }
     setLoading(false);
   };
@@ -159,15 +160,15 @@ export default function HostelDashboard() {
     }
   };
 
-  const hostelStudents = applications.filter(a => a.profiles?.student_type === 'hostel');
-  const pendingApps = filteredApps.filter(a => a.status === 'hostel_verification_pending' && !a.hostel_verified);
+  const hostelStudents = applications;
+  const pendingApps = filteredApps.filter(a => !a.hostel_verified && a.library_verified && a.status !== 'rejected');
   const approvedApps = filteredApps.filter(a => a.hostel_verified === true);
   const rejectedApps = filteredApps.filter(a => a.status === 'rejected' && !a.hostel_verified);
   
   const stats = {
     total: hostelStudents.length,
-    pending: hostelStudents.filter(a => !a.hostel_verified && a.status !== 'rejected').length,
-    approved: hostelStudents.filter(a => a.hostel_verified).length,
+    pending: hostelStudents.filter(a => !a.hostel_verified && a.library_verified && a.status !== 'rejected').length,
+    approved: hostelStudents.filter(a => a.hostel_verified === true).length,
     rejected: hostelStudents.filter(a => a.status === 'rejected' && !a.hostel_verified).length
   };
 
