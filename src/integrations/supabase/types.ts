@@ -69,6 +69,20 @@ export type Database = {
             foreignKeyName: "application_subject_faculty_faculty_id_fkey"
             columns: ["faculty_id"]
             isOneToOne: false
+            referencedRelation: "class_advisors_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_subject_faculty_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "counsellors_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_subject_faculty_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
             referencedRelation: "faculty_public"
             referencedColumns: ["id"]
           },
@@ -193,6 +207,20 @@ export type Database = {
             foreignKeyName: "applications_class_advisor_id_fkey"
             columns: ["class_advisor_id"]
             isOneToOne: false
+            referencedRelation: "class_advisors_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_class_advisor_id_fkey"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "counsellors_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_class_advisor_id_fkey"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
             referencedRelation: "faculty_public"
             referencedColumns: ["id"]
           },
@@ -201,6 +229,20 @@ export type Database = {
             columns: ["class_advisor_id"]
             isOneToOne: false
             referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_counsellor_id_fkey"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "class_advisors_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_counsellor_id_fkey"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "counsellors_public"
             referencedColumns: ["id"]
           },
           {
@@ -548,6 +590,26 @@ export type Database = {
       }
     }
     Views: {
+      class_advisors_public: {
+        Row: {
+          department: Database["public"]["Enums"]["department"] | null
+          designation: string | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+        }
+        Relationships: []
+      }
+      counsellors_public: {
+        Row: {
+          department: Database["public"]["Enums"]["department"] | null
+          designation: string | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+        }
+        Relationships: []
+      }
       faculty_public: {
         Row: {
           department: Database["public"]["Enums"]["department"] | null
