@@ -14,7 +14,50 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, title, role, userName = "User" }: DashboardLayoutProps) => {
   const navigate = useNavigate();
-  const { unreadCount } = useNotifications();
+  const { notifications, unreadCount } = useNotifications();
+
+  const getRoleSpecificNotifications = () => {
+    return notifications.filter(n => {
+      const titleLower = n.title.toLowerCase();
+      const messageLower = n.message.toLowerCase();
+      
+      switch(role) {
+        case 'counsellor':
+          return titleLower.includes('ready for counsellor verification') || 
+                 titleLower === 'application ready for counsellor verification';
+        
+        case 'class_advisor':
+          return titleLower.includes('ready for class advisor verification') ||
+                 titleLower === 'application ready for class advisor verification';
+        
+        case 'faculty':
+          return titleLower.includes('faculty') && 
+                 !titleLower.includes('counsellor') && 
+                 !titleLower.includes('class advisor');
+        
+        case 'hod':
+          return titleLower.includes('hod') || messageLower.includes('hod');
+        
+        case 'library':
+          return titleLower.includes('library') || messageLower.includes('library');
+        
+        case 'hostel':
+          return titleLower.includes('hostel') || messageLower.includes('hostel');
+        
+        case 'lab_instructor':
+          return titleLower.includes('lab') || messageLower.includes('lab');
+        
+        case 'college_office':
+          return titleLower.includes('college office') || messageLower.includes('college office');
+        
+        default:
+          return true; // Show all for admin/student
+      }
+    });
+  };
+
+  const roleSpecificNotifications = getRoleSpecificNotifications();
+  const roleSpecificUnreadCount = roleSpecificNotifications.filter(n => !n.read).length;
 
   const handleLogout = () => {
     navigate('/');
@@ -58,12 +101,12 @@ const DashboardLayout = ({ children, title, role, userName = "User" }: Dashboard
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative" onClick={handleNotifications}>
                 <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
+                {roleSpecificUnreadCount > 0 && (
                   <Badge 
                     variant="destructive" 
                     className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                   >
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {roleSpecificUnreadCount > 9 ? '9+' : roleSpecificUnreadCount}
                   </Badge>
                 )}
               </Button>
