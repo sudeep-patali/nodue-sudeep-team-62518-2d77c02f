@@ -30,6 +30,12 @@ export default function CounsellorDashboard() {
   const fetchApplications = async () => {
     try {
       setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from("applications")
         .select(`
@@ -46,6 +52,7 @@ export default function CounsellorDashboard() {
           )
         `)
         .eq("faculty_verified", true)
+        .eq("counsellor_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

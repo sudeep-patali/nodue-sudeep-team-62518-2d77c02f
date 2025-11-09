@@ -92,11 +92,13 @@ export type Database = {
         Row: {
           batch: string
           class_advisor_comment: string | null
+          class_advisor_id: string | null
           class_advisor_verified: boolean | null
           class_advisor_verified_at: string | null
           college_office_comment: string | null
           college_office_verified: boolean | null
           counsellor_comment: string | null
+          counsellor_id: string | null
           counsellor_verified: boolean | null
           counsellor_verified_at: string | null
           created_at: string | null
@@ -123,11 +125,13 @@ export type Database = {
         Insert: {
           batch: string
           class_advisor_comment?: string | null
+          class_advisor_id?: string | null
           class_advisor_verified?: boolean | null
           class_advisor_verified_at?: string | null
           college_office_comment?: string | null
           college_office_verified?: boolean | null
           counsellor_comment?: string | null
+          counsellor_id?: string | null
           counsellor_verified?: boolean | null
           counsellor_verified_at?: string | null
           created_at?: string | null
@@ -154,11 +158,13 @@ export type Database = {
         Update: {
           batch?: string
           class_advisor_comment?: string | null
+          class_advisor_id?: string | null
           class_advisor_verified?: boolean | null
           class_advisor_verified_at?: string | null
           college_office_comment?: string | null
           college_office_verified?: boolean | null
           counsellor_comment?: string | null
+          counsellor_id?: string | null
           counsellor_verified?: boolean | null
           counsellor_verified_at?: string | null
           created_at?: string | null
@@ -183,6 +189,34 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "applications_class_advisor_id_fkey"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_class_advisor_id_fkey"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_counsellor_id_fkey"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_counsellor_id_fkey"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "applications_student_id_fkey"
             columns: ["student_id"]

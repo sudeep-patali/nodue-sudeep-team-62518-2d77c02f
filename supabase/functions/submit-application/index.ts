@@ -21,6 +21,8 @@ interface ApplicationSubmission {
   semester: number;
   batch: string;
   subjects: SubjectFaculty[];
+  counsellor_id: string;
+  class_advisor_id: string;
 }
 
 serve(async (req) => {
@@ -152,6 +154,84 @@ serve(async (req) => {
       }
     }
 
+    // Validate counsellor_id
+    if (!submission.counsellor_id || !uuidRegex.test(submission.counsellor_id)) {
+      return new Response(
+        JSON.stringify({ error: 'Valid Student Counsellor must be selected' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate class_advisor_id
+    if (!submission.class_advisor_id || !uuidRegex.test(submission.class_advisor_id)) {
+      return new Response(
+        JSON.stringify({ error: 'Valid Class Advisor must be selected' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Verifying counsellor and class advisor...');
+
+    // Verify counsellor exists, is active, and has counsellor role
+    const { data: counsellor, error: counsellorError } = await supabaseAdmin
+      .from('staff_profiles')
+      .select('id, name, is_active')
+      .eq('id', submission.counsellor_id)
+      .eq('is_active', true)
+      .single();
+
+    if (counsellorError || !counsellor) {
+      return new Response(
+        JSON.stringify({ error: 'Selected counsellor is invalid or inactive' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify counsellor has the counsellor role
+    const { data: hasCounsellorRole, error: counsellorRoleError } = await supabaseAdmin
+      .rpc('has_role', { 
+        _user_id: submission.counsellor_id, 
+        _role: 'counsellor' 
+      });
+
+    if (counsellorRoleError || !hasCounsellorRole) {
+      return new Response(
+        JSON.stringify({ error: 'Selected user does not have counsellor role' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify class advisor exists, is active, and has class_advisor role
+    const { data: classAdvisor, error: advisorError } = await supabaseAdmin
+      .from('staff_profiles')
+      .select('id, name, is_active')
+      .eq('id', submission.class_advisor_id)
+      .eq('is_active', true)
+      .single();
+
+    if (advisorError || !classAdvisor) {
+      return new Response(
+        JSON.stringify({ error: 'Selected class advisor is invalid or inactive' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify class advisor has the class_advisor role
+    const { data: hasAdvisorRole, error: advisorRoleError } = await supabaseAdmin
+      .rpc('has_role', { 
+        _user_id: submission.class_advisor_id, 
+        _role: 'class_advisor' 
+      });
+
+    if (advisorRoleError || !hasAdvisorRole) {
+      return new Response(
+        JSON.stringify({ error: 'Selected user does not have class advisor role' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Counsellor and class advisor verified');
+
     // Check for duplicate application
     console.log('Checking for duplicate application...');
     const { data: existingApp, error: dupCheckError } = await supabaseClient
@@ -221,6 +301,8 @@ serve(async (req) => {
         department: submission.department,
         semester: submission.semester,
         batch: submission.batch,
+        counsellor_id: submission.counsellor_id,
+        class_advisor_id: submission.class_advisor_id,
         status: 'pending',
       })
       .select()
@@ -271,6 +353,13 @@ serve(async (req) => {
       },
     });
 
+    // Get student profile for notifications
+    const { data: studentProfile } = await supabaseClient
+      .from('profiles')
+      .select('name, usn, department')
+      .eq('id', user.id)
+      .single();
+
     // Send notification to library staff (use admin client to bypass RLS)
     const { data: libraryStaff } = await supabaseAdmin.rpc('get_users_by_role', {
       role_name: 'library',
@@ -290,6 +379,26 @@ serve(async (req) => {
         notifications,
       });
     }
+
+    // Notify assigned counsellor
+    await supabaseAdmin.rpc('create_notification', {
+      p_user_id: submission.counsellor_id,
+      p_title: 'Student Application Assignment',
+      p_message: `${studentProfile.name} (${studentProfile.usn}) from ${studentProfile.department} has selected you as their Student Counsellor. You will be notified when the application reaches your verification stage.`,
+      p_type: 'info',
+      p_related_entity_type: 'application',
+      p_related_entity_id: appData.id,
+    });
+
+    // Notify assigned class advisor
+    await supabaseAdmin.rpc('create_notification', {
+      p_user_id: submission.class_advisor_id,
+      p_title: 'Student Application Assignment',
+      p_message: `${studentProfile.name} (${studentProfile.usn}) from ${studentProfile.department} has selected you as their Class Advisor. You will be notified when the application reaches your verification stage.`,
+      p_type: 'info',
+      p_related_entity_type: 'application',
+      p_related_entity_id: appData.id,
+    });
 
     console.log('Application created successfully:', appData.id);
 

@@ -30,6 +30,12 @@ export default function ClassAdvisorDashboard() {
   const fetchApplications = async () => {
     try {
       setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from("applications")
         .select(`
@@ -46,6 +52,7 @@ export default function ClassAdvisorDashboard() {
           )
         `)
         .eq("counsellor_verified", true)
+        .eq("class_advisor_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

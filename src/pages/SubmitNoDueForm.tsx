@@ -56,6 +56,12 @@ const SubmitNoDueForm = () => {
   const [selectedElectives, setSelectedElectives] = useState<string[]>([]);
   const [subjectFacultyMap, setSubjectFacultyMap] = useState<Record<string, string>>({});
   const [existingApplication, setExistingApplication] = useState<any>(null);
+  
+  // Academic supervisors
+  const [counsellorList, setCounsellorList] = useState<Faculty[]>([]);
+  const [classAdvisorList, setClassAdvisorList] = useState<Faculty[]>([]);
+  const [selectedCounsellor, setSelectedCounsellor] = useState<string>("");
+  const [selectedClassAdvisor, setSelectedClassAdvisor] = useState<string>("");
 
   useEffect(() => {
     if (!user) {
@@ -71,6 +77,8 @@ const SubmitNoDueForm = () => {
         fetchSubjects();
       }
       fetchFaculty();
+      fetchCounsellors();
+      fetchClassAdvisors();
     }
   }, [department, semester]);
 
@@ -161,6 +169,66 @@ const SubmitNoDueForm = () => {
     }
   };
 
+  const fetchCounsellors = async () => {
+    try {
+      // Fetch all active staff
+      const { data: staffData, error: staffError } = await supabase
+        .from('staff_profiles')
+        .select('id, name, designation, department, is_active')
+        .eq('is_active', true);
+
+      if (staffError) throw staffError;
+
+      const staffIds = staffData?.map(s => s.id) || [];
+      
+      // Filter by counsellor role
+      const { data: counsellorRoles, error: roleError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'counsellor')
+        .in('user_id', staffIds);
+
+      if (roleError) throw roleError;
+
+      const counsellorIds = new Set(counsellorRoles?.map(r => r.user_id) || []);
+      const counsellors = staffData?.filter(s => counsellorIds.has(s.id)) || [];
+      
+      setCounsellorList(counsellors);
+    } catch (error: any) {
+      console.error('Error fetching counsellors:', error);
+      toast.error('Failed to load counsellors');
+    }
+  };
+
+  const fetchClassAdvisors = async () => {
+    try {
+      const { data: staffData, error: staffError } = await supabase
+        .from('staff_profiles')
+        .select('id, name, designation, department, is_active')
+        .eq('is_active', true);
+
+      if (staffError) throw staffError;
+
+      const staffIds = staffData?.map(s => s.id) || [];
+      
+      const { data: advisorRoles, error: roleError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'class_advisor')
+        .in('user_id', staffIds);
+
+      if (roleError) throw roleError;
+
+      const advisorIds = new Set(advisorRoles?.map(r => r.user_id) || []);
+      const advisors = staffData?.filter(s => advisorIds.has(s.id)) || [];
+      
+      setClassAdvisorList(advisors);
+    } catch (error: any) {
+      console.error('Error fetching class advisors:', error);
+      toast.error('Failed to load class advisors');
+    }
+  };
+
   const groupFacultyByDesignation = () => {
     const grouped: Record<string, Faculty[]> = {
       'HOD': [],
@@ -213,6 +281,18 @@ const SubmitNoDueForm = () => {
   };
 
   const validateStep2 = () => {
+    // Validate counsellor selection first
+    if (!selectedCounsellor) {
+      toast.error("Please select a Student Counsellor");
+      return false;
+    }
+
+    // Validate class advisor selection
+    if (!selectedClassAdvisor) {
+      toast.error("Please select a Class Advisor");
+      return false;
+    }
+
     // Check if all fixed subjects have faculty assigned
     for (const subject of fixedSubjects) {
       if (!subjectFacultyMap[subject.id]) {
@@ -268,7 +348,9 @@ const SubmitNoDueForm = () => {
           department,
           semester,
           batch: profile.batch,
-          subjects: subjectFacultyMappings
+          subjects: subjectFacultyMappings,
+          counsellor_id: selectedCounsellor,
+          class_advisor_id: selectedClassAdvisor
         }
       });
 
@@ -462,6 +544,68 @@ const SubmitNoDueForm = () => {
               <CardDescription>Assign faculty for each subject</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Academic Supervisors Selection */}
+              <div className="border-b pb-6 mb-6">
+                <h3 className="text-xl font-semibold mb-4">Select Academic Supervisors</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Choose your Student Counsellor and Class Advisor. You can select faculty from any department.
+                </p>
+                
+                {/* Student Counsellor Selection */}
+                <div className="mb-4">
+                  <Label className="text-base">
+                    Student Counsellor <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={selectedCounsellor}
+                    onValueChange={setSelectedCounsellor}
+                  >
+                    <SelectTrigger className="w-full mt-2">
+                      <SelectValue placeholder="Select your Student Counsellor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {counsellorList.map((counsellor) => (
+                        <SelectItem key={counsellor.id} value={counsellor.id}>
+                          <div className="flex flex-col py-1">
+                            <span className="font-medium">{counsellor.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {counsellor.designation} • {counsellor.department} Department
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Class Advisor Selection */}
+                <div>
+                  <Label className="text-base">
+                    Class Advisor <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={selectedClassAdvisor}
+                    onValueChange={setSelectedClassAdvisor}
+                  >
+                    <SelectTrigger className="w-full mt-2">
+                      <SelectValue placeholder="Select your Class Advisor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classAdvisorList.map((advisor) => (
+                        <SelectItem key={advisor.id} value={advisor.id}>
+                          <div className="flex flex-col py-1">
+                            <span className="font-medium">{advisor.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {advisor.designation} • {advisor.department} Department
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Fixed Subjects */}
               <div>
                 <h3 className="text-lg font-semibold mb-3">Core Subjects</h3>
@@ -614,6 +758,32 @@ const SubmitNoDueForm = () => {
                   <p className="font-medium">{department}</p>
                   <p className="text-muted-foreground">Semester:</p>
                   <p className="font-medium">{semester}</p>
+                </div>
+              </div>
+
+              {/* Academic Supervisors Review */}
+              <div>
+                <h3 className="font-semibold text-lg mb-2">Academic Supervisors</h3>
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Student Counsellor:</p>
+                    <p className="font-medium">
+                      {counsellorList.find(c => c.id === selectedCounsellor)?.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {counsellorList.find(c => c.id === selectedCounsellor)?.designation} • {counsellorList.find(c => c.id === selectedCounsellor)?.department} Department
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Class Advisor:</p>
+                    <p className="font-medium">
+                      {classAdvisorList.find(a => a.id === selectedClassAdvisor)?.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {classAdvisorList.find(a => a.id === selectedClassAdvisor)?.designation} • {classAdvisorList.find(a => a.id === selectedClassAdvisor)?.department} Department
+                    </p>
+                  </div>
                 </div>
               </div>
 
