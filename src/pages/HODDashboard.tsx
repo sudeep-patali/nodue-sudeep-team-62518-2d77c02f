@@ -197,8 +197,10 @@ export default function HODDashboard() {
       // For re-approval of rejected applications
       const isReapproval = selectedApp.status === 'rejected';
       
-      // Update all faculty assignments for this application and current HOD (as faculty)
-      const assignmentsToUpdate = selectedApp.faculty_assignments.map((a: any) => a.id);
+      // Update only faculty assignments where current user is the assigned faculty
+      const assignmentsToUpdate = selectedApp.faculty_assignments
+        .filter((a: any) => a.faculty_id === user?.id)
+        .map((a: any) => a.id);
       
       const { error: updateError } = await supabase
         .from('application_subject_faculty')
