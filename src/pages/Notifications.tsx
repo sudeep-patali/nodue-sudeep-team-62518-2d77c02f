@@ -167,16 +167,16 @@ const Notifications = () => {
 
   const handleBackNavigation = () => {
     const dashboardRoutes: Record<string, string> = {
-      'counsellor': '/counsellor/dashboard',
-      'class_advisor': '/class-advisor/dashboard',
-      'faculty': '/faculty/dashboard',
-      'hod': '/hod/dashboard',
-      'library': '/library/dashboard',
-      'hostel': '/hostel/dashboard',
-      'lab_instructor': '/lab-instructor/dashboard',
-      'college_office': '/college-office/dashboard',
-      'admin': '/admin/dashboard',
-      'student': '/student/dashboard',
+      'counsellor': '/dashboard/counsellor',
+      'class_advisor': '/dashboard/class_advisor',
+      'faculty': '/dashboard/faculty',
+      'hod': '/dashboard/hod',
+      'library': '/dashboard/library',
+      'hostel': '/dashboard/hostel',
+      'lab_instructor': '/dashboard/lab_instructor',
+      'college_office': '/dashboard/college_office',
+      'admin': '/dashboard/admin',
+      'student': '/dashboard/student',
     };
     
     const route = currentRole ? dashboardRoutes[currentRole] : '/';
