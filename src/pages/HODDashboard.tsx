@@ -142,7 +142,6 @@ export default function HODDashboard() {
           }
           applicationMap.get(appId).faculty_assignments.push({
             id: assignment.id,
-            faculty_id: assignment.faculty_id,
             subject_id: assignment.subject_id,
             subject_name: assignment.subjects?.name,
             subject_code: assignment.subjects?.code,
