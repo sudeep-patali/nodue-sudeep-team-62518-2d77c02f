@@ -81,6 +81,7 @@ export default function HODDashboard() {
           .select(`
             id,
             faculty_verified,
+            verification_status,
             faculty_comment,
             verified_at,
             created_at,
@@ -145,6 +146,7 @@ export default function HODDashboard() {
             subject_name: assignment.subjects?.name,
             subject_code: assignment.subjects?.code,
             faculty_verified: assignment.faculty_verified,
+            verification_status: assignment.verification_status,
             faculty_comment: assignment.faculty_comment,
             verified_at: assignment.verified_at
           });
@@ -214,12 +216,12 @@ export default function HODDashboard() {
       // Check if ALL faculty members have verified this application
       const { data: allAssignments, error: checkError } = await supabase
         .from('application_subject_faculty')
-        .select('faculty_verified')
+        .select('faculty_verified, verification_status')
         .eq('application_id', applicationId);
 
       if (checkError) throw checkError;
 
-      const allVerified = allAssignments?.every(a => a.faculty_verified === true);
+      const allVerified = allAssignments?.every(a => a.verification_status === 'approved');
 
       // If all faculty have verified OR if rejected OR if re-approving, update the main application
       if (allVerified || !approved || isReapproval) {
@@ -378,11 +380,11 @@ export default function HODDashboard() {
   const teachingStats = {
     total: teachingApplications.length,
     pending: teachingApplications.filter(a => {
-      const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+      const allVerified = a.faculty_assignments?.every((fa: any) => fa.verification_status === 'approved');
       return !allVerified && a.status !== 'rejected';
     }).length,
     approved: teachingApplications.filter(a => {
-      const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+      const allVerified = a.faculty_assignments?.every((fa: any) => fa.verification_status === 'approved');
       return allVerified;
     }).length,
     rejected: teachingApplications.filter(a => a.status === 'rejected').length
@@ -396,13 +398,13 @@ export default function HODDashboard() {
     if (activeMode === 'teaching') {
       if (activeTab === 'pending') {
         return teachingApplications.filter(a => {
-          const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+          const allVerified = a.faculty_assignments?.every((fa: any) => fa.verification_status === 'approved');
           return !allVerified && a.status !== 'rejected';
         });
       }
       if (activeTab === 'approved') {
         return teachingApplications.filter(a => {
-          const allVerified = a.faculty_assignments?.every((fa: any) => fa.faculty_verified);
+          const allVerified = a.faculty_assignments?.every((fa: any) => fa.verification_status === 'approved');
           return allVerified;
         });
       }
@@ -660,7 +662,7 @@ export default function HODDashboard() {
                               {activeMode === 'teaching' ? (
                                 app.status === 'rejected' ? (
                                   <Badge variant="destructive">Rejected</Badge>
-                                ) : item.faculty_assignments?.every((fa: any) => fa.faculty_verified) ? (
+                                ) : item.faculty_assignments?.every((fa: any) => fa.verification_status === 'approved') ? (
                                   <Badge variant="default">Verified</Badge>
                                 ) : (
                                   <Badge variant="secondary">Pending</Badge>
@@ -681,7 +683,7 @@ export default function HODDashboard() {
                             <TableCell>
                               {activeMode === 'teaching' ? (
                                 <>
-                                  {activeTab === 'pending' && !item.faculty_assignments?.every((fa: any) => fa.faculty_verified) && (
+                                  {activeTab === 'pending' && !item.faculty_assignments?.every((fa: any) => fa.verification_status === 'approved') && (
                                     <Button size="sm" onClick={() => setSelectedApp(item)}>
                                       Review
                                     </Button>
@@ -745,7 +747,7 @@ export default function HODDashboard() {
                           <p className="font-medium">{assignment.subject_name}</p>
                           <p className="text-xs text-muted-foreground">{assignment.subject_code}</p>
                         </div>
-                        {assignment.faculty_verified && (
+                        {assignment.verification_status === 'approved' && (
                           <Badge variant="default">Verified</Badge>
                         )}
                       </div>
