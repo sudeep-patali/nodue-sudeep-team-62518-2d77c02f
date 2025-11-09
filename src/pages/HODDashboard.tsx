@@ -204,6 +204,7 @@ export default function HODDashboard() {
           faculty_verified: approved,
           faculty_comment: comment || null,
           verified_at: approved ? new Date().toISOString() : null,
+          verification_status: approved ? 'approved' : 'rejected',
           updated_at: new Date().toISOString()
         })
         .in('id', assignmentsToUpdate);
