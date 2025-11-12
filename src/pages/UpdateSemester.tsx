@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, RefreshCw, Users, GraduationCap, Plus, Trash2, Settings, Clock, FileText, AlertCircle, Settings2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, Users, GraduationCap, Plus, Trash2, Clock, FileText, AlertCircle, Settings2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useToast } from "@/hooks/use-toast";
@@ -55,11 +55,10 @@ const UpdateSemester = () => {
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Global submission settings
+  // Global submission settings (read-only, used for batch fallback)
   const [globalEnabled, setGlobalEnabled] = useState(true);
   const [scheduledStart, setScheduledStart] = useState<string>('');
   const [scheduledEnd, setScheduledEnd] = useState<string>('');
-  const [isUpdatingGlobal, setIsUpdatingGlobal] = useState(false);
 
   // Batch-specific settings
   const [batchSettings, setBatchSettings] = useState<Map<string, BatchSettings>>(new Map());
@@ -148,67 +147,6 @@ const UpdateSemester = () => {
     }
   };
 
-  const handleToggleGlobal = async (enabled: boolean) => {
-    setIsUpdatingGlobal(true);
-    try {
-      const { error } = await supabase
-        .from('global_submission_settings')
-        .update({ 
-          enabled,
-          updated_at: new Date().toISOString(),
-          updated_by: user?.id
-        })
-        .eq('id', (await supabase.from('global_submission_settings').select('id').single()).data?.id);
-
-      if (error) throw error;
-
-      setGlobalEnabled(enabled);
-      toast({
-        title: "Success",
-        description: `Student submissions ${enabled ? 'enabled' : 'disabled'} globally`,
-      });
-    } catch (error) {
-      console.error('Error toggling global submissions:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update submission setting",
-        variant: "destructive"
-      });
-    } finally {
-      setIsUpdatingGlobal(false);
-    }
-  };
-
-  const handleUpdateSchedule = async () => {
-    setIsUpdatingGlobal(true);
-    try {
-      const { error } = await supabase
-        .from('global_submission_settings')
-        .update({ 
-          scheduled_start: scheduledStart || null,
-          scheduled_end: scheduledEnd || null,
-          updated_at: new Date().toISOString(),
-          updated_by: user?.id
-        })
-        .eq('id', (await supabase.from('global_submission_settings').select('id').single()).data?.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Schedule updated successfully",
-      });
-    } catch (error) {
-      console.error('Error updating schedule:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update schedule",
-        variant: "destructive"
-      });
-    } finally {
-      setIsUpdatingGlobal(false);
-    }
-  };
 
   const handleToggleBatch = async (batchName: string, enabled: boolean) => {
     try {
@@ -386,30 +324,6 @@ const UpdateSemester = () => {
     return "Custom settings active";
   };
 
-  const getStatusMessage = () => {
-    const now = new Date();
-    
-    if (!globalEnabled) {
-      return "❌ Submissions are currently disabled globally";
-    }
-    
-    if (scheduledStart) {
-      const start = new Date(scheduledStart);
-      if (now < start) {
-        return `⏳ Submissions will open on ${start.toLocaleString()}`;
-      }
-    }
-    
-    if (scheduledEnd) {
-      const end = new Date(scheduledEnd);
-      if (now > end) {
-        return "⏰ Scheduled submission window has closed";
-      }
-      return `⏰ Submissions will close on ${end.toLocaleString()}`;
-    }
-    
-    return "✅ Submissions are currently open";
-  };
 
   const getBatchStatus = (batchName: string): "default" | "destructive" | "secondary" | "outline" => {
     const settings = batchSettings.get(batchName);
@@ -681,84 +595,6 @@ const UpdateSemester = () => {
           </Dialog>
         </div>
 
-        {/* Global Submission Control Card */}
-        <Card className="mb-6 border-2 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                <CardTitle>Global Submission Control</CardTitle>
-              </div>
-              <Badge variant={globalEnabled ? "default" : "destructive"}>
-                {globalEnabled ? 'Enabled' : 'Disabled'}
-              </Badge>
-            </div>
-            <CardDescription>
-              Master control for all no-due form submissions
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Master toggle */}
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div>
-                <h4 className="font-semibold mb-1">Enable Submissions</h4>
-                <p className="text-sm text-muted-foreground">
-                  Master switch to enable/disable all submissions
-                </p>
-              </div>
-              <Switch
-                checked={globalEnabled}
-                onCheckedChange={handleToggleGlobal}
-                disabled={isUpdatingGlobal}
-              />
-            </div>
-
-            {/* Schedule settings */}
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Schedule Opening/Closing Times
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Opens At (Optional)</Label>
-                  <Input
-                    type="datetime-local"
-                    value={scheduledStart}
-                    onChange={(e) => setScheduledStart(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Leave empty for no start time restriction
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Closes At (Optional)</Label>
-                  <Input
-                    type="datetime-local"
-                    value={scheduledEnd}
-                    onChange={(e) => setScheduledEnd(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Leave empty for no end time restriction
-                  </p>
-                </div>
-                <Button onClick={handleUpdateSchedule} disabled={isUpdatingGlobal}>
-                  {isUpdatingGlobal ? 'Saving...' : 'Save Schedule'}
-                </Button>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Status message */}
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {getStatusMessage()}
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Selection Panel */}
