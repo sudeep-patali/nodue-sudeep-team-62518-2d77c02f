@@ -161,7 +161,7 @@ const AddFaculty = () => {
       const role = selectedDesignation === 'HOD' ? 'hod' : 'faculty';
       
       // Call the edge function to create faculty
-      const response = await supabase.functions.invoke('create-faculty', {
+      const response = await supabase.functions.invoke('create_faculty', {
         headers: { Authorization: `Bearer ${session.session.access_token}` },
         body: {
           name: formData.name,
