@@ -266,16 +266,16 @@ serve(async (req) => {
 
     // Verify faculty exist (use admin client to bypass RLS)
     console.log('Verifying faculty...');
-    const facultyIds = submission.subjects.map(s => s.faculty_id);
+    const uniqueFacultyIds = [...new Set(submission.subjects.map(s => s.faculty_id))];
     const { data: faculty, error: facultyError } = await supabaseAdmin
       .from('staff_profiles')
       .select('id')
-      .in('id', facultyIds)
+      .in('id', uniqueFacultyIds)
       .eq('is_active', true);
 
-    if (facultyError || !faculty || faculty.length !== facultyIds.length) {
+    if (facultyError || !faculty || faculty.length !== uniqueFacultyIds.length) {
       console.error('Faculty verification error:', facultyError);
-      console.error('Expected faculty:', facultyIds.length, 'Found:', faculty?.length || 0);
+      console.error('Expected unique faculty:', uniqueFacultyIds.length, 'Found:', faculty?.length || 0);
       return new Response(
         JSON.stringify({ error: 'One or more faculty members are invalid or inactive' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
