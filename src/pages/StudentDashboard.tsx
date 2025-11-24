@@ -87,6 +87,14 @@ interface Application {
   lab_comment?: string;
   transaction_id?: string;
   faculty_assignments?: FacultyAssignment[];
+  counsellor?: {
+    name: string;
+    designation: string;
+  };
+  class_advisor?: {
+    name: string;
+    designation: string;
+  };
 }
 
 const StudentDashboard = () => {
@@ -148,10 +156,14 @@ const StudentDashboard = () => {
       // Check submission status
       await checkSubmissionStatus(profileData.batch);
 
-      // Fetch student applications
+      // Fetch student applications with counsellor and class advisor names
       const { data: applicationsData, error: applicationsError } = await supabase
         .from('applications')
-        .select('*')
+        .select(`
+          *,
+          counsellor:counsellor_id(name, designation),
+          class_advisor:class_advisor_id(name, designation)
+        `)
         .eq('student_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -410,13 +422,17 @@ const StudentDashboard = () => {
       name: "Counsellor", 
       verified: currentApplication.counsellor_verified, 
       required: true,
-      comment: currentApplication.counsellor_comment 
+      comment: currentApplication.counsellor_comment,
+      assignedTo: currentApplication.counsellor?.name || null,
+      designation: currentApplication.counsellor?.designation || null
     },
     { 
       name: "Class Advisor", 
       verified: currentApplication.class_advisor_verified, 
       required: true,
-      comment: currentApplication.class_advisor_comment 
+      comment: currentApplication.class_advisor_comment,
+      assignedTo: currentApplication.class_advisor?.name || null,
+      designation: currentApplication.class_advisor?.designation || null
     },
     { 
       name: "HOD", 
@@ -736,6 +752,12 @@ const StudentDashboard = () => {
                         <p className="font-semibold text-base">
                           {step.name} Verification
                         </p>
+                        {step.assignedTo && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Assigned to: <span className="font-medium text-foreground">{step.assignedTo}</span>
+                            {step.designation && <span className="text-xs"> ({step.designation})</span>}
+                          </p>
+                        )}
                         {step.verified ? (
                           <p className="text-sm text-success mt-1">✓ Verified</p>
                         ) : (
