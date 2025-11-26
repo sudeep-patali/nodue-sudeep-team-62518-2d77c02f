@@ -309,6 +309,104 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_applications_class_advisor"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_class_advisor"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_college_office_verified_by"
+            columns: ["college_office_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_college_office_verified_by"
+            columns: ["college_office_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_counsellor"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_counsellor"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hod_verified_by"
+            columns: ["hod_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hod_verified_by"
+            columns: ["hod_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hostel_verified_by"
+            columns: ["hostel_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hostel_verified_by"
+            columns: ["hostel_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_lab_verified_by"
+            columns: ["lab_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_lab_verified_by"
+            columns: ["lab_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_library_verified_by"
+            columns: ["library_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_library_verified_by"
+            columns: ["library_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       audit_logs: {
