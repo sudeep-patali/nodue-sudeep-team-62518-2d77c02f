@@ -181,13 +181,13 @@ const StudentDashboard = () => {
         .from('applications')
         .select(`
           *,
-          counsellor:counsellor_id(name, designation),
-          class_advisor:class_advisor_id(name, designation),
-          library_verifier:library_verified_by(name, designation),
-          hostel_verifier:hostel_verified_by(name, designation),
-          college_office_verifier:college_office_verified_by(name, designation),
-          hod_verifier:hod_verified_by(name, designation),
-          lab_verifier:lab_verified_by(name, designation)
+          counsellor:staff_profiles!counsellor_id(name, designation),
+          class_advisor:staff_profiles!class_advisor_id(name, designation),
+          library_verifier:staff_profiles!library_verified_by(name, designation),
+          hostel_verifier:staff_profiles!hostel_verified_by(name, designation),
+          college_office_verifier:staff_profiles!college_office_verified_by(name, designation),
+          hod_verifier:staff_profiles!hod_verified_by(name, designation),
+          lab_verifier:staff_profiles!lab_verified_by(name, designation)
         `)
         .eq('student_id', user.id)
         .order('created_at', { ascending: false });
@@ -205,8 +205,8 @@ const StudentDashboard = () => {
               verification_status,
               faculty_comment,
               verified_at,
-              subjects:subject_id(name, code),
-              staff_profiles:faculty_id(name, designation, department)
+              subjects:subjects!subject_id(name, code),
+              staff_profiles:staff_profiles!faculty_id(name, designation, department)
             `)
             .eq('application_id', app.id)
             .order('created_at', { ascending: true });
