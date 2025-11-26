@@ -97,6 +97,7 @@ export type Database = {
           class_advisor_verified_at: string | null
           college_office_comment: string | null
           college_office_verified: boolean | null
+          college_office_verified_by: string | null
           counsellor_comment: string | null
           counsellor_id: string | null
           counsellor_verified: boolean | null
@@ -107,13 +108,17 @@ export type Database = {
           faculty_verified: boolean | null
           hod_comment: string | null
           hod_verified: boolean | null
+          hod_verified_by: string | null
           hostel_comment: string | null
           hostel_verified: boolean | null
+          hostel_verified_by: string | null
           id: string
           lab_comment: string | null
           lab_verified: boolean | null
+          lab_verified_by: string | null
           library_comment: string | null
           library_verified: boolean | null
+          library_verified_by: string | null
           payment_comment: string | null
           payment_verified: boolean | null
           semester: number
@@ -130,6 +135,7 @@ export type Database = {
           class_advisor_verified_at?: string | null
           college_office_comment?: string | null
           college_office_verified?: boolean | null
+          college_office_verified_by?: string | null
           counsellor_comment?: string | null
           counsellor_id?: string | null
           counsellor_verified?: boolean | null
@@ -140,13 +146,17 @@ export type Database = {
           faculty_verified?: boolean | null
           hod_comment?: string | null
           hod_verified?: boolean | null
+          hod_verified_by?: string | null
           hostel_comment?: string | null
           hostel_verified?: boolean | null
+          hostel_verified_by?: string | null
           id?: string
           lab_comment?: string | null
           lab_verified?: boolean | null
+          lab_verified_by?: string | null
           library_comment?: string | null
           library_verified?: boolean | null
+          library_verified_by?: string | null
           payment_comment?: string | null
           payment_verified?: boolean | null
           semester: number
@@ -163,6 +173,7 @@ export type Database = {
           class_advisor_verified_at?: string | null
           college_office_comment?: string | null
           college_office_verified?: boolean | null
+          college_office_verified_by?: string | null
           counsellor_comment?: string | null
           counsellor_id?: string | null
           counsellor_verified?: boolean | null
@@ -173,13 +184,17 @@ export type Database = {
           faculty_verified?: boolean | null
           hod_comment?: string | null
           hod_verified?: boolean | null
+          hod_verified_by?: string | null
           hostel_comment?: string | null
           hostel_verified?: boolean | null
+          hostel_verified_by?: string | null
           id?: string
           lab_comment?: string | null
           lab_verified?: boolean | null
+          lab_verified_by?: string | null
           library_comment?: string | null
           library_verified?: boolean | null
+          library_verified_by?: string | null
           payment_comment?: string | null
           payment_verified?: boolean | null
           semester?: number
@@ -204,6 +219,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_college_office_verified_by_fkey"
+            columns: ["college_office_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_college_office_verified_by_fkey"
+            columns: ["college_office_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_counsellor_id_fkey"
             columns: ["counsellor_id"]
             isOneToOne: false
@@ -218,10 +247,164 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_hod_verified_by_fkey"
+            columns: ["hod_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_hod_verified_by_fkey"
+            columns: ["hod_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_hostel_verified_by_fkey"
+            columns: ["hostel_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_hostel_verified_by_fkey"
+            columns: ["hostel_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_lab_verified_by_fkey"
+            columns: ["lab_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_lab_verified_by_fkey"
+            columns: ["lab_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_library_verified_by_fkey"
+            columns: ["library_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_library_verified_by_fkey"
+            columns: ["library_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_class_advisor"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_class_advisor"
+            columns: ["class_advisor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_college_office_verified_by"
+            columns: ["college_office_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_college_office_verified_by"
+            columns: ["college_office_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_counsellor"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_counsellor"
+            columns: ["counsellor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hod_verified_by"
+            columns: ["hod_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hod_verified_by"
+            columns: ["hod_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hostel_verified_by"
+            columns: ["hostel_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_hostel_verified_by"
+            columns: ["hostel_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_lab_verified_by"
+            columns: ["lab_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_lab_verified_by"
+            columns: ["lab_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_library_verified_by"
+            columns: ["library_verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_applications_library_verified_by"
+            columns: ["library_verified_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
             referencedColumns: ["id"]
           },
         ]
