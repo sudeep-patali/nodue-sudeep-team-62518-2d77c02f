@@ -161,8 +161,8 @@ const StudentDashboard = () => {
         .from('applications')
         .select(`
           *,
-          counsellor:counsellor_id(name, designation),
-          class_advisor:class_advisor_id(name, designation)
+          counsellor:staff_profiles!applications_counsellor_id_fkey(name, designation),
+          class_advisor:staff_profiles!applications_class_advisor_id_fkey(name, designation)
         `)
         .eq('student_id', user.id)
         .order('created_at', { ascending: false });
