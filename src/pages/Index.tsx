@@ -196,7 +196,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2024 Nodex - Digital No-Due Certificate System. All rights reserved.</p>
+          <p>© 2025 Nodex - Digital No-Due Certificate System. All rights reserved.</p>
         </div>
       </footer>
     </div>
