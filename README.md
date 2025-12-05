@@ -1,38 +1,3 @@
-# Welcome to your Lovable project
-
-## Project info
-
-**URL**: https://lovable.dev/projects/e910506e-dcc7-4e8e-a931-67d8ea5d4b58
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-[**Use Lovable**
-https://lovable.dev/projects/6b08b3d0-847d-4226-ac59-759a44fcb0c5
-Changes made via Lovable will be committed automatically to this repo.](https://lovable.dev/projects/afaf6dda-da6f-481e-a461-2887b0b1f544)
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
 
 **Edit a file directly in GitHub**
 
